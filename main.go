@@ -100,7 +100,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.Message) {
 		text = strings.Replace(text, mention_text, mention.Username, -1)
 	}
 
-	text = strings.Replace(text, "<@everyone>", "", -1)
+	text = strings.Replace(text, "@everyone", "", -1)
 
 	// Log cleaned up message
 	fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), m.Author.Username, text)
