@@ -65,6 +65,11 @@ func parse_link(url string) string {
 	title_en := doc.Find("#gn").Text()
 	//title_jp := doc.Find("#gj").Text()
 
+	if len(title_en) < 1 {
+		// Don't even bother with tags
+		return ""
+	}
+
 	text := fmt.Sprintf("**%s**\n```", title_en)
 
 	taglist := doc.Find("#taglist > table > tbody > tr")
