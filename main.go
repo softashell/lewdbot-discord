@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -16,7 +17,8 @@ var bots = [...]string{
 }
 
 var (
-	chat *Chat
+	chat   *Chat
+	client *http.Client
 )
 
 func main() {
@@ -26,7 +28,11 @@ func main() {
 	chat.learnFileLines("./data/dump.txt", true)
 	chat.learnFileLines("./data/chatlog.txt", false)
 
-	d, err := discordgo.New(LoginFromFile("config.json"))
+	email, pw, id, hash := LoadConfigFromFile("config.json")
+
+	client = create_client(id, hash)
+
+	d, err := discordgo.New(email, pw)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -44,23 +50,25 @@ func main() {
 	return
 }
 
-func LoginFromFile(filename string) (string, string) {
+func LoadConfigFromFile(filename string) (string, string, string, string) {
 	fileDump, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return "", ""
+		fmt.Println(err.Error())
 	}
 
 	type fileCredentials struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email         string `json:"email"`
+		Password      string `json:"password"`
+		Exhtentai_id  string `json:"exhentai_id"`
+		Exhentai_hash string `json:"exhentai_hash"`
 	}
 
 	var creds = fileCredentials{}
 	if err := json.Unmarshal(fileDump, &creds); err != nil {
-		return "", ""
+		fmt.Println(err.Error())
 	}
 
-	return creds.Email, creds.Password
+	return creds.Email, creds.Password, creds.Exhtentai_id, creds.Exhentai_hash
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.Message) {
@@ -104,6 +112,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.Message) {
 
 	// Log cleaned up message
 	fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), m.Author.Username, text)
+
+	links_found, reply := parse_links(text)
+
+	if links_found {
+		s.ChannelMessageSend(m.ChannelID, reply)
+		return
+	}
 
 	// Accept the legacy mention as well and trim it off from text
 	if strings.HasPrefix(strings.ToLower(text), "lewdbot, ") {
