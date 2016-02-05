@@ -87,7 +87,7 @@ func parse_link(url string) string {
 
 	}
 
-	text += "```"
+	text += url + "```"
 
 	return text
 }
