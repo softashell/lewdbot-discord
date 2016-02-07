@@ -39,20 +39,25 @@ func create_client(id string, hash string) *http.Client {
 
 func parse_links(text string) (bool, string) {
 	links := regexp.MustCompile(`http://(ex|g\.e-)hentai.org/g/[[:alnum:]]+/[[:alnum:]]+`).FindAllString(text, -1)
+	links = remove_duplicate_links(links)
 
 	found := false
+	add_urls := false
 	reply := ""
 
-	for _, link := range links {
-		reply += parse_link(link)
+	if len(links) > 1 {
+		add_urls = true
+	}
 
+	for _, link := range links {
+		reply += parse_link(link, add_urls)
 		found = true
 	}
 
 	return found, reply
 }
 
-func parse_link(url string) string {
+func parse_link(url string, add_url bool) string {
 	resp, err := client.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -92,7 +97,26 @@ func parse_link(url string) string {
 
 	}
 
-	text += url + "```"
+	if add_url {
+		text += url
+	}
+
+	text += "```"
 
 	return text
+}
+
+func remove_duplicate_links(links []string) []string {
+	found := map[string]bool{}
+	result := []string{}
+
+	for v := range links {
+		if !found[links[v]] {
+			found[links[v]] = true
+
+			result = append(result, links[v])
+		}
+	}
+
+	return result
 }
