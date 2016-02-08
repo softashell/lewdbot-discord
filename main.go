@@ -6,7 +6,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 	"io/ioutil"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -17,8 +16,7 @@ var bots = [...]string{
 }
 
 var (
-	chat   *Chat
-	client *http.Client
+	chat *Chat
 )
 
 func main() {
@@ -28,9 +26,7 @@ func main() {
 	chat.learnFileLines("./data/dump.txt", true)
 	chat.learnFileLines("./data/chatlog.txt", false)
 
-	email, pw, id, hash := LoadConfigFromFile("config.json")
-
-	client = create_client(id, hash)
+	email, pw := LoadConfigFromFile("config.json")
 
 	d, err := discordgo.New(email, pw)
 	if err != nil {
@@ -50,17 +46,15 @@ func main() {
 	return
 }
 
-func LoadConfigFromFile(filename string) (string, string, string, string) {
+func LoadConfigFromFile(filename string) (string, string) {
 	fileDump, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	type fileCredentials struct {
-		Email         string `json:"email"`
-		Password      string `json:"password"`
-		Exhtentai_id  string `json:"exhentai_id"`
-		Exhentai_hash string `json:"exhentai_hash"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	var creds = fileCredentials{}
@@ -68,7 +62,7 @@ func LoadConfigFromFile(filename string) (string, string, string, string) {
 		fmt.Println(err.Error())
 	}
 
-	return creds.Email, creds.Password, creds.Exhtentai_id, creds.Exhentai_hash
+	return creds.Email, creds.Password
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.Message) {

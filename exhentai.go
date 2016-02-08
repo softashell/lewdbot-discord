@@ -1,122 +1,215 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"net/http"
-	"net/http/cookiejar"
-	"net/url"
-	"regexp"
+	"github.com/parnurzeal/gorequest"
+	"github.com/softashell/lewdbot-discord/regex"
+	"html"
+	"strconv"
+	"strings"
 )
 
-func create_client(id string, hash string) *http.Client {
-	cookieJar, _ := cookiejar.New(nil)
+const (
+	api_url = "http://g.e-hentai.org/api.php"
+)
 
-	cookies := []*http.Cookie{
-		{
-			Name:   "ipb_member_id",
-			Value:  id,
-			Path:   "/",
-			Domain: ".exhentai.org",
-		},
-		{
-			Name:   "ipb_pass_hash",
-			Value:  hash,
-			Path:   "/",
-			Domain: ".exhentai.org",
-		},
-	}
+var ()
 
-	cookieURL, _ := url.Parse("http://exhentai.org")
-	cookieJar.SetCookies(cookieURL, cookies)
+type ehentai_request struct {
+	Method    string     `json:"method"`
+	Gidlist   [][]string `json:"gidlist"`
+	Pagelist  [][]string `json:"pagelist"`
+	Namespace int        `json:"namespace"`
+}
 
-	client := &http.Client{
-		Jar: cookieJar,
-	}
+type ehentai_response struct {
+	Gmetadata []gallery_metadata `json:"gmetadata"`
+	Tokenlist []gallery_metadata `json:"tokenlist"`
+}
 
-	return client
+type gallery_metadata struct {
+	Gid   int      `json:"gid"`
+	Token string   `json:"token"`
+	Title string   `json:"title"`
+	Tags  []string `json:"tags"`
+	Error string   `json:"error"`
 }
 
 func parse_links(text string) (bool, string) {
-	links := regexp.MustCompile(`http://(ex|g\.e-)hentai.org/g/[[:alnum:]]+/[[:alnum:]]+`).FindAllString(text, -1)
-	links = remove_duplicate_links(links)
+	galleries := [][]string{} // id, token
+	pages := [][]string{}     // id, page_token, page_number
 
-	found := false
-	add_urls := false
-	reply := ""
+	gallery_links := regex.GalleryLink.FindAllStringSubmatch(text, -1)
+	gallery_page_links := regex.GalleryPage.FindAllStringSubmatch(text, -1)
 
-	if len(links) > 1 {
-		add_urls = true
+	for _, link := range gallery_links {
+		id := link[1]
+		token := link[2]
+
+		galleries = append(galleries, []string{id, token})
 	}
 
-	for _, link := range links {
-		reply += parse_link(link, add_urls)
-		found = true
+	for _, link := range gallery_page_links {
+		page_token := link[1]
+		id := link[2]
+		page_number := link[3]
+
+		pages = append(pages, []string{id, page_token, page_number})
 	}
 
-	return found, reply
+	if len(pages) > 0 {
+		for _, gallery := range get_gallery_tokens(pages) {
+			galleries = append(galleries, gallery)
+		}
+	}
+
+	if len(galleries) < 1 {
+		return false, ""
+	}
+
+	gallery_metadata := get_gallery_metadata(galleries)
+
+	reply := parse_gallery_metadata(gallery_metadata)
+
+	return true, reply
 }
 
-func parse_link(url string, add_url bool) string {
-	resp, err := client.Get(url)
+func make_json_request(method string, list [][]string) []gallery_metadata {
+
+	// Make json struct
+	jsonStruct := ehentai_request{
+		Method: method,
+	}
+
+	switch method {
+	case "gdata":
+		{
+			jsonStruct.Gidlist = list
+			jsonStruct.Namespace = 1
+		}
+	case "gtoken":
+		{
+			jsonStruct.Pagelist = list
+		}
+	}
+
+	// Convert json object to string
+	jsonString, err := json.Marshal(jsonStruct)
 	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Post the request
+	_, reply, errs := gorequest.New().Post(api_url).Send(string(jsonString)).EndBytes()
+
+	if err != nil {
+		for _, err := range errs {
+			fmt.Println(err.Error())
+		}
+	}
+
+	var response ehentai_response
+
+	if err := json.Unmarshal(reply, &response); err != nil {
 		fmt.Println(err.Error())
-		return ""
-	}
-	defer resp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-
-	title_en := doc.Find("#gn").Text()
-	//title_jp := doc.Find("#gj").Text()
-
-	if len(title_en) < 1 {
-		// Don't even bother with tags
-		return ""
 	}
 
-	text := fmt.Sprintf("**%s**\n```", title_en)
+	switch method {
+	case "gdata":
+		{
+			return response.Gmetadata
+		}
+	case "gtoken":
+		{
+			return response.Tokenlist
+		}
+	}
 
-	taglist := doc.Find("#taglist > table > tbody > tr")
+	return []gallery_metadata{}
+}
 
-	if taglist.Length() > 0 {
-		groups := taglist.Find(".tc")
-		for i := range groups.Nodes {
-			group := groups.Eq(i)
+func get_gallery_tokens(pagelist [][]string) [][]string {
+	tokenList := make_json_request("gtoken", pagelist)
 
-			text += fmt.Sprintf("%s ", group.Text())
+	galleries := [][]string{}
 
-			tags := group.Next().Find(".gt, .gtl")
-			for i := range tags.Nodes {
-				tag := tags.Eq(i)
-
-				text += fmt.Sprintf("%s ", tag.Text())
-			}
-			text += fmt.Sprintf("\n")
+	for _, gallery := range tokenList {
+		if len(gallery.Error) > 0 {
+			fmt.Printf("gid: %s error: %s", gallery.Gid, gallery.Error)
+			continue
 		}
 
+		galleries = append(galleries, []string{strconv.Itoa(gallery.Gid), gallery.Token})
 	}
 
-	if add_url {
-		text += url
+	return galleries
+}
+
+func get_gallery_metadata(galleries [][]string) []gallery_metadata {
+	galleryMetadata := make_json_request("gdata", galleries)
+
+	return galleryMetadata
+}
+
+func parse_gallery_metadata(galleries []gallery_metadata) string {
+	var text string
+	var add_url bool
+
+	if len(galleries) > 1 {
+		add_url = true
 	}
 
-	text += "```"
+	for _, gallery := range galleries {
+		if len(gallery.Error) > 0 {
+			fmt.Printf("gid: %s error: %s", gallery.Gid, gallery.Error)
+			continue
+		}
+
+		text += fmt.Sprintf("**%s**\n```", html.UnescapeString(gallery.Title))
+
+		var keys []string // Need to keep slice with keys since map doesn't preserve order
+		tags := map[string][]string{}
+
+		for _, _tag := range gallery.Tags {
+			_tag := strings.Split(_tag, ":")
+
+			group, tag := "misc", ""
+
+			if len(_tag) > 1 { // group:tag_name
+				group = _tag[0]
+				tag = _tag[1]
+			} else { // tag_name
+				tag = _tag[0]
+			}
+
+			tags[group] = append(tags[group], tag)
+
+			// Only add new key is last one was different
+			if len(keys) > 0 && keys[len(keys)-1] == group {
+				continue
+			}
+
+			keys = append(keys, group)
+		}
+
+		for _, group := range keys {
+			text += fmt.Sprintf("%s: ", group)
+			for i, tag := range tags[group] {
+				if i < len(tags[group])-1 {
+					text += fmt.Sprintf("%s, ", tag)
+				} else {
+					text += fmt.Sprintf("%s\n", tag)
+				}
+			}
+		}
+
+		if add_url {
+			text += fmt.Sprintf("http://exhentai.org/g/%d/%s/\n", gallery.Gid, gallery.Token)
+		}
+
+		text += fmt.Sprintf("\n```")
+	}
 
 	return text
-}
-
-func remove_duplicate_links(links []string) []string {
-	found := map[string]bool{}
-	result := []string{}
-
-	for v := range links {
-		if !found[links[v]] {
-			found[links[v]] = true
-
-			result = append(result, links[v])
-		}
-	}
-
-	return result
 }

@@ -34,4 +34,7 @@ var (
 	LeadingNumbers = regexp.MustCompile(`^\d{2,}`)
 	// Mentions in discord <@126510493828513793>
 	Mentions = regexp.MustCompile(`<@(\d+)>`)
+	// Exhentai urls
+	GalleryLink = regexp.MustCompile(`http://exhentai.org/g/([[:digit:]]+)/([[:alnum:]]+)`)
+	GalleryPage = regexp.MustCompile(`http://exhentai.org/s/([[:alnum:]]+)/([[:digit:]]+)-([[:digit:]]+)`)
 )
