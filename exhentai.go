@@ -14,8 +14,6 @@ const (
 	api_url = "http://g.e-hentai.org/api.php"
 )
 
-var ()
-
 type ehentai_request struct {
 	Method    string     `json:"method"`
 	Gidlist   [][]string `json:"gidlist"`
