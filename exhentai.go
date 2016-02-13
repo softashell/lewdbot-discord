@@ -164,7 +164,14 @@ func parse_gallery_metadata(galleries []gallery_metadata) string {
 			continue
 		}
 
-		text += fmt.Sprintf("**%s**\n```", html.UnescapeString(gallery.Title))
+		text += fmt.Sprintf("**%s**", html.UnescapeString(gallery.Title))
+
+		if add_url {
+			// DISCORD A SHIT
+			text += fmt.Sprintf(" *exhentai.org/g/%d/%s/*", gallery.Gid, gallery.Token)
+		}
+
+		text += fmt.Sprintf("\n```")
 
 		var keys []string // Need to keep slice with keys since map doesn't preserve order
 		tags := map[string][]string{}
@@ -200,10 +207,6 @@ func parse_gallery_metadata(galleries []gallery_metadata) string {
 					text += fmt.Sprintf("%s\n", tag)
 				}
 			}
-		}
-
-		if add_url {
-			text += fmt.Sprintf("http://exhentai.org/g/%d/%s/\n", gallery.Gid, gallery.Token)
 		}
 
 		text += fmt.Sprintf("\n```")
