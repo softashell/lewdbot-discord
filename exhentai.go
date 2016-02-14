@@ -16,9 +16,9 @@ const (
 
 type ehentai_request struct {
 	Method    string     `json:"method"`
-	Gidlist   [][]string `json:"gidlist"`
-	Pagelist  [][]string `json:"pagelist"`
-	Namespace int        `json:"namespace"`
+	Gidlist   [][]string `json:"gidlist,omitempty"`
+	Pagelist  [][]string `json:"pagelist,omitempty"`
+	Namespace int        `json:"namespace,omitempty"`
 }
 
 type ehentai_response struct {
