@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -47,25 +45,6 @@ func main() {
 	// Simple way to keep program running until any key press.
 	var input string
 	fmt.Scanln(&input)
-}
-
-func LoadConfigFromFile(filename string) (string, string) {
-	fileDump, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	type fileCredentials struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	var creds = fileCredentials{}
-	if err := json.Unmarshal(fileDump, &creds); err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	return creds.Email, creds.Password
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.Message) {
