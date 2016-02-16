@@ -23,12 +23,16 @@ func NewChat() *Chat {
 
 func (c *Chat) learnFileLines(path string, simple bool) error {
 	f, err := os.Open(path)
+
 	if err != nil {
+		log.Println(err.Error())
+
 		return err
 	}
+
 	defer f.Close()
 
-	text := ""
+	var text string
 
 	s := bufio.NewScanner(bufio.NewReader(f))
 	for s.Scan() {
@@ -46,18 +50,6 @@ func (c *Chat) learnFileLines(path string, simple bool) error {
 	}
 
 	return s.Err()
-}
-
-func cleanMessage(message string) string {
-	message = regex.Link.ReplaceAllString(message, "")
-	message = regex.Emoticon.ReplaceAllString(message, "")
-	message = regex.Junk.ReplaceAllString(message, "")
-	message = regex.WikipediaCitations.ReplaceAllString(message, "")
-	message = regex.Actions.ReplaceAllString(message, " ")
-	message = regex.Russian.ReplaceAllString(message, "")
-	message = regex.RepeatedWhitespace.ReplaceAllString(message, " ")
-
-	return strings.TrimSpace(message)
 }
 
 func (c *Chat) learnMessage(text string, log bool) bool {
@@ -93,6 +85,20 @@ func (c *Chat) generateReply(message string) string {
 	return reply
 }
 
+func (c *Chat) logMessage(message string) {
+	f, err := os.OpenFile("./data/chatlog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString(fmt.Sprintf("%s\n\n", message)); err != nil {
+		log.Println(err)
+	}
+}
+
 func generateEntropy(s string) (e float64) {
 	m := make(map[rune]bool)
 	for _, r := range s {
@@ -118,14 +124,14 @@ func getWordCount(s string) int {
 	return len(res)
 }
 
-func (c *Chat) logMessage(message string) {
-	f, err := os.OpenFile("./data/chatlog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+func cleanMessage(message string) string {
+	message = regex.Link.ReplaceAllString(message, "")
+	message = regex.Emoticon.ReplaceAllString(message, "")
+	message = regex.Junk.ReplaceAllString(message, "")
+	message = regex.WikipediaCitations.ReplaceAllString(message, "")
+	message = regex.Actions.ReplaceAllString(message, " ")
+	message = regex.Russian.ReplaceAllString(message, "")
+	message = regex.RepeatedWhitespace.ReplaceAllString(message, " ")
 
-	if _, err = f.WriteString(fmt.Sprintf("%s\n\n", message)); err != nil {
-		log.Println(err)
-	}
+	return strings.TrimSpace(message)
 }

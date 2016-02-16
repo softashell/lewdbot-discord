@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -33,7 +34,7 @@ func main() {
 
 	d, err := discordgo.New(email, pw)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err.Error())
 		return
 	}
 
@@ -46,13 +47,12 @@ func main() {
 	// Simple way to keep program running until any key press.
 	var input string
 	fmt.Scanln(&input)
-	return
 }
 
 func LoadConfigFromFile(filename string) (string, string) {
 	fileDump, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	}
 
 	type fileCredentials struct {
@@ -62,7 +62,7 @@ func LoadConfigFromFile(filename string) (string, string) {
 
 	var creds = fileCredentials{}
 	if err := json.Unmarshal(fileDump, &creds); err != nil {
-		fmt.Println(err.Error())
+		log.Fatalln(err.Error())
 	}
 
 	return creds.Email, creds.Password
