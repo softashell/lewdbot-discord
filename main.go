@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 )
@@ -21,6 +22,8 @@ var (
 
 func main() {
 	chat = NewChat()
+
+	os.Mkdir("./data", 0644)
 
 	chat.learnFileLines("./data/brain.txt", true)
 	chat.learnFileLines("./data/dump.txt", true)
