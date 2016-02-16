@@ -24,7 +24,7 @@ var (
 func main() {
 	chat = NewChat()
 
-	os.Mkdir("./data", 0644)
+	os.Mkdir("./data", 0744)
 
 	chat.learnFileLines("./data/brain.txt", true)
 	chat.learnFileLines("./data/dump.txt", true)
