@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/parnurzeal/gorequest"
-	"github.com/softashell/lewdbot-discord/regex"
 	"html"
 	"strconv"
 	"strings"
@@ -32,45 +31,6 @@ type gallery_metadata struct {
 	Title string   `json:"title"`
 	Tags  []string `json:"tags"`
 	Error string   `json:"error"`
-}
-
-func ParseLinks(text string) (bool, string) {
-	galleries := [][]string{} // id, token
-	pages := [][]string{}     // id, page_token, page_number
-
-	gallery_links := regex.GalleryLink.FindAllStringSubmatch(text, -1)
-	gallery_page_links := regex.GalleryPage.FindAllStringSubmatch(text, -1)
-
-	for _, link := range gallery_links {
-		id := link[1]
-		token := link[2]
-
-		galleries = append(galleries, []string{id, token})
-	}
-
-	for _, link := range gallery_page_links {
-		page_token := link[1]
-		id := link[2]
-		page_number := link[3]
-
-		pages = append(pages, []string{id, page_token, page_number})
-	}
-
-	if len(pages) > 0 {
-		for _, gallery := range get_gallery_tokens(pages) {
-			galleries = append(galleries, gallery)
-		}
-	}
-
-	if len(galleries) < 1 {
-		return false, ""
-	}
-
-	gallery_metadata := get_gallery_metadata(galleries)
-
-	reply := parse_gallery_metadata(gallery_metadata)
-
-	return true, reply
 }
 
 func make_json_request(method string, list [][]string) []gallery_metadata {

@@ -35,6 +35,8 @@ var (
 	// Mentions in discord <@126510493828513793>
 	Mentions = regexp.MustCompile(`<@(\d+)>`)
 	// Exhentai urls
-	GalleryLink = regexp.MustCompile(`http://exhentai.org/g/([[:digit:]]+)/([[:alnum:]]+)`)
-	GalleryPage = regexp.MustCompile(`http://exhentai.org/s/([[:alnum:]]+)/([[:digit:]]+)-([[:digit:]]+)`)
+	ExGalleryLink = regexp.MustCompile(`http:\/\/exhentai\.org\/g\/([[:digit:]]+)/([[:alnum:]]+)`)
+	ExGalleryPage = regexp.MustCompile(`http:\/\/exhentai\.org\/s\/([[:alnum:]]+)/([[:digit:]]+)-([[:digit:]]+)`)
+	// nhentai urls
+	NhGalleryLink = regexp.MustCompile(`http:\/\/nhentai\.net\/g\/([[:digit:]]+)`)
 )
