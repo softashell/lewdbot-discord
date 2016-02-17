@@ -1,4 +1,4 @@
-package main
+package brain
 
 import (
 	"bufio"
@@ -11,17 +11,34 @@ import (
 	"strings"
 )
 
-type Chat struct {
-	brain *fate.Model
+var lewdbrain *fate.Model
+
+func Init() {
+	lewdbrain = fate.NewModel(fate.Config{})
 }
 
-func NewChat() *Chat {
-	return &Chat{
-		fate.NewModel(fate.Config{}),
+func Learn(text string, log bool) bool {
+	text = cleanMessage(text)
+
+	if len(text) < 5 ||
+		len(text) > 1000 ||
+		getWordCount(text) < 3 ||
+		regex.JustPunctuation.MatchString(text) ||
+		regex.LeadingNumbers.MatchString(text) ||
+		generateEntropy(text) < 3.0 {
+		return false // Text doesn't contain enough information
 	}
+
+	lewdbrain.Learn(text)
+
+	if log {
+		logMessage(text)
+	}
+
+	return true
 }
 
-func (c *Chat) learnFileLines(path string, simple bool) error {
+func LearnFileLines(path string, simple bool) error {
 	f, err := os.Open(path)
 
 	if err != nil {
@@ -39,53 +56,32 @@ func (c *Chat) learnFileLines(path string, simple bool) error {
 		line := s.Text()
 		if !simple { //Learn all lines between empty lines
 			if line == "" {
-				c.learnMessage(text, false)
+				Learn(text, false)
 				text = ""
 			} else {
 				text += " " + line
 			}
 		} else { // Learn every line
-			c.learnMessage(line, false)
+			Learn(line, false)
 		}
 	}
 
 	return s.Err()
 }
 
-func (c *Chat) learnMessage(text string, log bool) bool {
-	text = cleanMessage(text)
+func Reply(message string) string {
+	reply := lewdbrain.Reply(message)
 
-	if len(text) < 5 ||
-		len(text) > 1000 ||
-		getWordCount(text) < 3 ||
-		regex.JustPunctuation.MatchString(text) ||
-		regex.LeadingNumbers.MatchString(text) ||
-		generateEntropy(text) < 3.0 {
-		return false // Text doesn't contain enough information
-	}
-
-	c.brain.Learn(text)
-
-	if log {
-		c.logMessage(text)
-	}
-
-	return true
-}
-
-func (c *Chat) generateReply(message string) string {
-	reply := c.brain.Reply(message)
 	reply = strings.TrimSpace(reply)
-
 	reply = regex.TrailingPunctuation.ReplaceAllString(reply, "")
 	reply = fmt.Sprintf("%s~", reply)
 
-	c.learnMessage(message, true)
+	Learn(message, true)
 
 	return reply
 }
 
-func (c *Chat) logMessage(message string) {
+func logMessage(message string) {
 	f, err := os.OpenFile("./data/chatlog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 
 	if err != nil {

@@ -1,7 +1,9 @@
-To set up login details, save and edit this as config.json in *$PWD*
+To set up login details, save and edit this as config.json in *$PWD/data/*
 ```JSON
 {
-  "email": "",
-  "password": ""
+  "login": {
+    "email": "",
+    "password": ""
+  }
 }
 ```

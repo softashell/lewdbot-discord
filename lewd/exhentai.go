@@ -1,4 +1,4 @@
-package main
+package lewd
 
 import (
 	"encoding/json"
@@ -34,7 +34,7 @@ type gallery_metadata struct {
 	Error string   `json:"error"`
 }
 
-func parse_links(text string) (bool, string) {
+func ParseLinks(text string) (bool, string) {
 	galleries := [][]string{} // id, token
 	pages := [][]string{}     // id, page_token, page_number
 
