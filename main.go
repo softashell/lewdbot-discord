@@ -61,7 +61,7 @@ func connectToDiscord() {
 	log.Println("Connected")
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.Message) {
+func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	text := m.ContentWithMentionsReplaced()
 
 	if m.Author.ID == s.State.User.ID {
