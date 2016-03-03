@@ -46,7 +46,7 @@ func connectToDiscord() {
 	}
 
 	// Register messageCreate as a callback for the OnMessageCreate event.
-	dg.OnMessageCreate = messageCreate
+	dg.AddHandler(messageCreate)
 
 	// Retry after broken websocket
 	dg.ShouldReconnectOnError = true
