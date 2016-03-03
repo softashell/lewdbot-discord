@@ -91,11 +91,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	links_found, reply := lewd.ParseLinks(text)
+	if m.ChannelID == "135871025652039681" || m.ChannelID == "145313296617177088" {
+		// Only trigger lewd link parser on #indecency and #lewd
+		// TODO: Add this to config and remove hardcoded values
+		links_found, reply := lewd.ParseLinks(text)
 
-	if links_found {
-		s.ChannelMessageSend(m.ChannelID, reply)
-		return
+		if links_found {
+			s.ChannelMessageSend(m.ChannelID, reply)
+			return
+		}
 	}
 
 	// Accept the legacy mention as well and trim it off from text
