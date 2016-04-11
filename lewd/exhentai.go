@@ -10,22 +10,22 @@ import (
 )
 
 const (
-	api_url = "http://g.e-hentai.org/api.php"
+	apiURL = "http://g.e-hentai.org/api.php"
 )
 
-type ehentai_request struct {
+type ehentaiRequest struct {
 	Method    string     `json:"method"`
 	Gidlist   [][]string `json:"gidlist,omitempty"`
 	Pagelist  [][]string `json:"pagelist,omitempty"`
 	Namespace int        `json:"namespace,omitempty"`
 }
 
-type ehentai_response struct {
-	Gmetadata []gallery_metadata `json:"gmetadata"`
-	Tokenlist []gallery_metadata `json:"tokenlist"`
+type ehentaiResponse struct {
+	Gmetadata []galleryMetadata `json:"gmetadata"`
+	Tokenlist []galleryMetadata `json:"tokenlist"`
 }
 
-type gallery_metadata struct {
+type galleryMetadata struct {
 	Gid   int      `json:"gid"`
 	Token string   `json:"token"`
 	Title string   `json:"title"`
@@ -33,10 +33,10 @@ type gallery_metadata struct {
 	Error string   `json:"error"`
 }
 
-func make_json_request(method string, list [][]string) []gallery_metadata {
+func makeRequest(method string, list [][]string) []galleryMetadata {
 
 	// Make json struct
-	jsonStruct := ehentai_request{
+	jsonStruct := ehentaiRequest{
 		Method: method,
 	}
 
@@ -59,7 +59,7 @@ func make_json_request(method string, list [][]string) []gallery_metadata {
 	}
 
 	// Post the request
-	_, reply, errs := gorequest.New().Post(api_url).Send(string(jsonString)).EndBytes()
+	_, reply, errs := gorequest.New().Post(apiURL).Send(string(jsonString)).EndBytes()
 
 	if err != nil {
 		for _, err := range errs {
@@ -67,7 +67,7 @@ func make_json_request(method string, list [][]string) []gallery_metadata {
 		}
 	}
 
-	var response ehentai_response
+	var response ehentaiResponse
 
 	if err := json.Unmarshal(reply, &response); err != nil {
 		fmt.Println(err.Error())
@@ -84,17 +84,17 @@ func make_json_request(method string, list [][]string) []gallery_metadata {
 		}
 	}
 
-	return []gallery_metadata{}
+	return []galleryMetadata{}
 }
 
-func get_gallery_tokens(pagelist [][]string) [][]string {
-	tokenList := make_json_request("gtoken", pagelist)
+func getGalleryTokens(pagelist [][]string) [][]string {
+	tokenList := makeRequest("gtoken", pagelist)
 
 	galleries := [][]string{}
 
 	for _, gallery := range tokenList {
 		if len(gallery.Error) > 0 {
-			fmt.Printf("gid: %s error: %s", gallery.Gid, gallery.Error)
+			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
 			continue
 		}
 
@@ -104,29 +104,29 @@ func get_gallery_tokens(pagelist [][]string) [][]string {
 	return galleries
 }
 
-func get_gallery_metadata(galleries [][]string) []gallery_metadata {
-	galleryMetadata := make_json_request("gdata", galleries)
+func getGalleryMetadata(galleries [][]string) []galleryMetadata {
+	galleryMetadata := makeRequest("gdata", galleries)
 
 	return galleryMetadata
 }
 
-func parse_gallery_metadata(galleries []gallery_metadata) string {
+func parseGalleryMetadata(galleries []galleryMetadata) string {
 	var text string
-	var add_url bool
+	var includeLink bool
 
 	if len(galleries) > 1 {
-		add_url = true
+		includeLink = true
 	}
 
 	for _, gallery := range galleries {
 		if len(gallery.Error) > 0 {
-			fmt.Printf("gid: %s error: %s", gallery.Gid, gallery.Error)
+			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
 			continue
 		}
 
 		text += fmt.Sprintf("**%s**", html.UnescapeString(gallery.Title))
 
-		if add_url {
+		if includeLink {
 			// DISCORD A SHIT
 			text += fmt.Sprintf(" *exhentai.org/g/%d/%s/*", gallery.Gid, gallery.Token)
 		}

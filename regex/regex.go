@@ -24,19 +24,20 @@ var (
 	NotActualText = regexp.MustCompile(`[^\p{L} ]`)
 	// Greentext matches '>lines like these'
 	Greentext = regexp.MustCompile(`^>`)
-	// *whips out cancer*
+	// Actions *whips out cancer*
 	Actions = regexp.MustCompile(`\*.*\*`)
-	// Lewdbot
+	// Lewdbot case insensitive lewdbot match
 	Lewdbot = regexp.MustCompile(`(?i)lewdbot`)
 	// JustPunctuation matches weird junk people send as empty messages.
 	JustPunctuation = regexp.MustCompile(`^[\.\\/!?:]`)
-	// Kills chatlog pasting
+	// LeadingNumbers Kills chatlog pasting
 	LeadingNumbers = regexp.MustCompile(`^\d{2,}`)
 	// Mentions in discord <@126510493828513793>
 	Mentions = regexp.MustCompile(`<@(\d+)>`)
-	// Exhentai urls
+	// ExGalleryLink Matches exhentai gallery links
 	ExGalleryLink = regexp.MustCompile(`http:\/\/exhentai\.org\/g\/([[:digit:]]+)/([[:alnum:]]+)`)
+	// ExGalleryPage Matches exhentai gallery page links
 	ExGalleryPage = regexp.MustCompile(`http:\/\/exhentai\.org\/s\/([[:alnum:]]+)/([[:digit:]]+)-([[:digit:]]+)`)
-	// nhentai urls
+	// NhGalleryLink Matches exhentai gallery linkss
 	NhGalleryLink = regexp.MustCompile(`http:\/\/nhentai\.net\/g\/([[:digit:]]+)`)
 )

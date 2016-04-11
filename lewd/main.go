@@ -4,53 +4,54 @@ import (
 	"github.com/softashell/lewdbot-discord/regex"
 )
 
+// ParseLinks Returns gallery metadata from founds links in input
 func ParseLinks(text string) (bool, string) {
-	ex_galleries := [][]string{} // id, token
-	ex_pages := [][]string{}     // id, page_token, page_number
+	exGalleries := [][]string{} // id, token
+	exPages := [][]string{}     // id, page_token, page_number
 
 	// exhentai
-	ex_gallery_links := regex.ExGalleryLink.FindAllStringSubmatch(text, -1)
-	ex_gallery_page_links := regex.ExGalleryPage.FindAllStringSubmatch(text, -1)
+	exGalleryLinks := regex.ExGalleryLink.FindAllStringSubmatch(text, -1)
+	exGalleryPageLinks := regex.ExGalleryPage.FindAllStringSubmatch(text, -1)
 
-	nh_galleries := []string{}
+	nhGalleries := []string{}
 
 	// nhentai
-	nh_gallery_links := regex.NhGalleryLink.FindAllStringSubmatch(text, -1)
+	nhGalleryLinks := regex.NhGalleryLink.FindAllStringSubmatch(text, -1)
 
-	for _, link := range ex_gallery_links {
+	for _, link := range exGalleryLinks {
 		id := link[1]
 		token := link[2]
 
-		ex_galleries = append(ex_galleries, []string{id, token})
+		exGalleries = append(exGalleries, []string{id, token})
 	}
 
-	for _, link := range ex_gallery_page_links {
-		page_token := link[1]
+	for _, link := range exGalleryPageLinks {
+		pageToken := link[1]
 		id := link[2]
-		page_number := link[3]
+		pageNumber := link[3]
 
-		ex_pages = append(ex_pages, []string{id, page_token, page_number})
+		exPages = append(exPages, []string{id, pageToken, pageNumber})
 	}
 
-	if len(ex_pages) > 0 {
-		for _, gallery := range get_gallery_tokens(ex_pages) {
-			ex_galleries = append(ex_galleries, gallery)
+	if len(exPages) > 0 {
+		for _, gallery := range getGalleryTokens(exPages) {
+			exGalleries = append(exGalleries, gallery)
 		}
 	}
 
 	// Doesn't actually do anything with it yet, maybe later
-	for _, link := range nh_gallery_links {
+	for _, link := range nhGalleryLinks {
 		id := link[1]
 
-		nh_galleries = append(nh_galleries, id)
+		nhGalleries = append(nhGalleries, id)
 	}
 
 	var reply string
 
-	if len(ex_galleries) > 0 {
-		gallery_metadata := get_gallery_metadata(ex_galleries)
-		reply = parse_gallery_metadata(gallery_metadata)
-	} else if len(nh_galleries) > 0 {
+	if len(exGalleries) > 0 {
+		galleryMetadata := getGalleryMetadata(exGalleries)
+		reply = parseGalleryMetadata(galleryMetadata)
+	} else if len(nhGalleries) > 0 {
 		reply = "```css\n>nhentai\n```"
 	} else {
 		// Didn't find anything

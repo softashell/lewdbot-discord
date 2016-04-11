@@ -13,10 +13,12 @@ import (
 
 var lewdbrain *fate.Model
 
+// Init Sets the global fate model
 func Init() {
 	lewdbrain = fate.NewModel(fate.Config{})
 }
 
+// Learn Attempts to learn and log input text
 func Learn(text string, log bool) bool {
 	text = cleanMessage(text)
 
@@ -38,6 +40,7 @@ func Learn(text string, log bool) bool {
 	return true
 }
 
+// LearnFileLines Attempts to learn input file
 func LearnFileLines(path string, simple bool) error {
 	f, err := os.Open(path)
 
@@ -69,6 +72,7 @@ func LearnFileLines(path string, simple bool) error {
 	return s.Err()
 }
 
+// Reply Returns generated reply to input and learns it
 func Reply(message string) string {
 	reply := lewdbrain.Reply(message)
 
