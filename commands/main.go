@@ -31,7 +31,7 @@ var eightballResponses = []string{
 }
 
 func ParseMessage(text string) (bool, string) {
-	if strings.HasPrefix(text, "!8ball") {
+	if strings.HasPrefix(strings.ToLower(text), "!8ball") {
 
 		reply := eightball(text)
 
