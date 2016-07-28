@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/brain"
+	"github.com/softashell/lewdbot-discord/commands"
 	"github.com/softashell/lewdbot-discord/config"
 	"github.com/softashell/lewdbot-discord/lewd"
 	"github.com/softashell/lewdbot-discord/regex"
@@ -62,7 +63,6 @@ func connectToDiscord() {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	text := m.ContentWithMentionsReplaced()
 
 	if m.Author.ID == s.State.User.ID {
 		// Ignore self
@@ -75,19 +75,25 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		channel.Name = "direct message"
 	}
 
-	if strings.HasPrefix(text, "!") || strings.HasPrefix(text, ".") || strings.HasPrefix(text, "bot.") {
-		// Ignore shit meant for other bots
+	isMentioned := isUserMentioned(s.State.User, m.Mentions) || m.MentionEveryone
+
+	if shouldIgnore(m.Author) {
 		return
 	}
 
-	isMentioned := isUserMentioned(s.State.User, m.Mentions) || m.MentionEveryone
-
+	text := m.ContentWithMentionsReplaced()
 	text = strings.Replace(text, "@everyone", "", -1)
 
 	// Log cleaned up message
 	fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), m.Author.Username, text)
 
-	if shouldIgnore(m.Author) {
+	commandFound, reply := commands.ParseMessage(text)
+
+	if commandFound {
+		s.ChannelMessageSend(m.ChannelID, reply)
+		return
+	} else if strings.HasPrefix(text, "!") || strings.HasPrefix(text, ".") || strings.HasPrefix(text, "bot.") {
+		// Ignore shit meant for other bots
 		return
 	}
 
