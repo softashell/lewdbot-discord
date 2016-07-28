@@ -1,0 +1,6 @@
+image: golang:latest
+
+build:
+  script:
+    - go get -d
+    - go build
