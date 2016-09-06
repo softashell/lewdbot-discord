@@ -87,7 +87,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Log cleaned up message
 	fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), m.Author.Username, text)
 
-	commandFound, reply := commands.ParseMessage(text)
+	commandFound, reply := commands.ParseMessage(s, m, text)
 
 	if commandFound {
 		s.ChannelMessageSend(m.ChannelID, reply)
