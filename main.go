@@ -131,6 +131,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func shouldIgnore(user *discordgo.User) bool {
 	c := config.Get()
 
+	if user.Bot {
+		return true
+	}
+
 	for _, id := range c.Blacklist {
 		if id == user.ID {
 			return true
