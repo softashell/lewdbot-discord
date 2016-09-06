@@ -94,7 +94,7 @@ func listRoles(s *discordgo.Session, GuildID string) string {
 	for _, role := range g.Roles {
 		fmt.Println(role)
 
-		if role.Name == "@everyone" {
+		if role.Name == "@everyone" || !role.Mentionable {
 			continue
 		}
 
@@ -112,48 +112,65 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 
 	exists, role := roleExists(g, arg)
 
-	fmt.Println(arg, exists, role)
-
 	if !exists {
-		return "I can't find such group~"
-		/*
-			role, err := s.GuildRoleCreate(GuildID)
+		if !strings.HasPrefix(arg, "yes") {
+			return fmt.Sprintf("I can't find such group~ Are you sure you didn't mistype it? Say **!subscribe yes %s** to create a new one~", arg)
+		}
+
+		arg = arg[4:]
+
+		if len(arg) < 1 {
+			return "Are you sure you actually typed a name?~"
+		}
+
+		exists, role = roleExists(g, arg)
+
+		if !exists {
+
+			newRole, err := s.GuildRoleCreate(GuildID)
 			if err != nil {
 				fmt.Println(err)
 				return "Failed to create role"
 			}
 
-			role.Name = arg
-			role.Permissions = 37080064
-
-			role, err = s.GuildRoleEdit(GuildID, role.ID, role.Name, role.Color, role.Hoist, role.Permissions)
+			role, err = s.GuildRoleEdit(GuildID, newRole.ID, arg, newRole.Color, newRole.Hoist, 37080064, true)
 			if err != nil {
 				fmt.Println(err)
-				return " "
+				return "Failed to change role permissions"
 			}
-		*/
+			fmt.Println(role)
+		} else {
+			return "Why are you trying to recreate that group?"
+		}
 	}
 
 	member, err := s.GuildMember(GuildID, UserID)
 	if err != nil {
 		fmt.Println(err)
+		return ""
 	}
 
-	for _, _role := range member.Roles {
-		if _role == role.ID {
-			return fmt.Sprintf("You're already subscribed to %s~", arg)
+	if exists {
+		for _, _role := range member.Roles {
+			if _role == role.ID {
+				return fmt.Sprintf("You're already subscribed to %s ~", arg)
+			}
 		}
 	}
 
-	member.Roles = append(member.Roles, role.ID)
+	newRoles := append(member.Roles, role.ID)
 
-	err = s.GuildMemberEdit(GuildID, UserID, member.Roles)
+	err = s.GuildMemberEdit(GuildID, UserID, newRoles)
 	if err != nil {
 		fmt.Println(err)
 		return "I can't touch that group dude, do it yourself~"
 	}
 
-	return fmt.Sprintf("You're now subscribed to %s~", arg)
+	if exists {
+		return fmt.Sprintf("You're now subscribed to %s~", arg)
+	}
+
+	return fmt.Sprintf("Created and subscribed to %s", arg)
 }
 
 func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string) string {
@@ -197,6 +214,32 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 		return "I can't touch that group dude, do it yourself~"
 	}
 
+	members, err := s.GuildMembers(GuildID, 0, 1000)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	delete := true
+
+	for _, member := range members {
+		for _, _role := range member.Roles {
+			if _role == role.ID {
+				delete = false
+				break
+			}
+		}
+	}
+	fmt.Println(delete, role)
+	if delete {
+		err := s.GuildRoleDelete(GuildID, role.ID)
+		if err != nil {
+			fmt.Println(err)
+			return fmt.Sprintf("Unsubscribed from but failed to delete %s~", arg)
+		}
+
+		return fmt.Sprintf("Unsubscribed from and deleted %s~", arg)
+	}
+
 	return fmt.Sprintf("Unsubscribed from %s~", arg)
 }
 
@@ -212,5 +255,5 @@ func roleExists(g *discordgo.Guild, name string) (bool, *discordgo.Role) {
 
 	}
 
-	return false, nil // &discordgo.Role{}
+	return false, nil
 }
