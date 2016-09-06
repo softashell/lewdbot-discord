@@ -117,11 +117,11 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 			return fmt.Sprintf("I can't find such group~ Are you sure you didn't mistype it? Say **!subscribe yes %s** to create a new one~", arg)
 		}
 
-		arg = arg[4:]
-
-		if len(arg) < 1 {
+		if len(arg) < 5 {
 			return "Are you sure you actually typed a name?~"
 		}
+
+		arg = arg[4:]
 
 		exists, role = roleExists(g, arg)
 
@@ -136,7 +136,14 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 			role, err = s.GuildRoleEdit(GuildID, newRole.ID, arg, newRole.Color, newRole.Hoist, 37080064, true)
 			if err != nil {
 				fmt.Println(err)
-				return "Failed to change role permissions"
+
+				err = s.GuildRoleDelete(GuildID, newRole.ID)
+
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				return "You fucking broke it~"
 			}
 			fmt.Println(role)
 		} else {
