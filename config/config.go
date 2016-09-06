@@ -14,6 +14,7 @@ type Config struct {
 type loginCredentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 var c Config
@@ -21,7 +22,7 @@ var c Config
 func Init() {
 	c = loadConfigFromFile("./data/config.json")
 
-	if len(c.Email) == 0 || len(c.Password) == 0 {
+	if (len(c.Email) == 0 || len(c.Password) == 0) && len(c.Token) == 0 {
 		log.Println("Unable to load login information, did you set it in config?")
 	}
 }

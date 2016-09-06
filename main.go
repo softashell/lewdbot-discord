@@ -40,7 +40,7 @@ func connectToDiscord() {
 
 	c := config.Get()
 
-	dg, err := discordgo.New(c.Email, c.Password)
+	dg, err := discordgo.New(c.Email, c.Password, c.Token)
 	if err != nil {
 		log.Println(err.Error())
 		return
