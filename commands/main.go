@@ -89,16 +89,49 @@ func listRoles(s *discordgo.Session, GuildID string) string {
 		fmt.Println(err)
 	}
 
-	var reply string
+	u, err := s.User("@me")
+	if err != nil {
+		fmt.Println("error obtaining account details,", err)
+	}
+
+	m, err := s.GuildMember(GuildID, u.ID)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	roleID := ""
+	rolePos := 0
+
+	if len(m.Roles) >= 1 {
+		roleID = m.Roles[0]
+	}
 
 	for _, role := range g.Roles {
+		if role.ID == roleID {
+			rolePos = role.Position
+			break
+		}
+	}
+
+	var reply string
+	roles := len(g.Roles) - 1
+
+	for i, role := range g.Roles {
 		fmt.Println(role)
 
-		if role.Name == "@everyone" || !role.Mentionable {
+		if role.Name == "@everyone" || !role.Mentionable || role.Position > rolePos {
 			continue
 		}
 
-		reply += fmt.Sprintf("%s | %d\n", role.Name, role.Position)
+		if i >= roles {
+			reply += fmt.Sprintf("%s~", role.Name)
+		} else {
+			reply += fmt.Sprintf("%s, ", role.Name)
+		}
+	}
+
+	if len(reply) <= 0 {
+		return "I couldn't find any mentionable roles you could subscribe to~"
 	}
 
 	return reply
@@ -126,8 +159,8 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 		exists, role = roleExists(g, arg)
 
 		if !exists {
-
 			newRole, err := s.GuildRoleCreate(GuildID)
+
 			if err != nil {
 				fmt.Println(err)
 				return "Failed to create role"
