@@ -40,7 +40,7 @@ func connectToDiscord() {
 
 	c := config.Get()
 
-	dg, err := discordgo.New(c.Email, c.Password, c.Token)
+	dg, err := discordgo.New(c.Email, c.Password, "Bot "+c.Token)
 	if err != nil {
 		log.Println(err.Error())
 		return
@@ -63,7 +63,6 @@ func connectToDiscord() {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
 	if m.Author.ID == s.State.User.ID {
 		// Ignore self
 		return
@@ -90,7 +89,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	commandFound, reply := commands.ParseMessage(s, m, text)
 
 	if commandFound {
-		s.ChannelMessageSend(m.ChannelID, reply)
+		_, err := s.ChannelMessageSend(m.ChannelID, reply)
+		if err != nil {
+			fmt.Println("s.ChannelMessageSend >> ", err)
+		}
 		return
 	} else if strings.HasPrefix(text, "!") || strings.HasPrefix(text, ".") || strings.HasPrefix(text, "bot.") {
 		// Ignore shit meant for other bots

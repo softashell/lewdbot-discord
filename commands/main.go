@@ -32,14 +32,15 @@ var eightballResponses = []string{
 }
 
 func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string) (bool, string) {
+	var reply string
 
-	channel, err := s.Channel(m.ChannelID)
+	channel, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("s.Channel(%s) >> %s\n", m.ChannelID, err.Error())
+		return false, reply
 	}
 
 	command := strings.ToLower(text)
-	reply := ""
 
 	if strings.HasPrefix(command, "!8ball") {
 		reply = eightball(text)
