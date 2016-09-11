@@ -1,6 +1,10 @@
 image: golang:latest
 
+before_script:
+  - go get -d
+  - cd $GOPATH/src/github.com/softashell/discordgo && git checkout develop
+  - cd $CI_PROJECT_DIR
+
 build:
   script:
-    - go get -d
     - go build
