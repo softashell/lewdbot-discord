@@ -52,10 +52,16 @@ func connectToDiscord() {
 	// Retry after broken websocket
 	dg.ShouldReconnectOnError = true
 
+	// Verify the Token is valid and grab user information
+	dg.State.User, err = dg.User("@me")
+	if err != nil {
+		log.Printf("error fetching user information, %s\n", err)
+	}
+
 	// Open websocket connection
 	err = dg.Open()
 	if err != nil {
-		log.Println(err)
+		log.Printf("error opening connection to Discord, %s\n", err)
 		return
 	}
 

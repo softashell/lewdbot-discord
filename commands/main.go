@@ -85,17 +85,13 @@ func eightball(text string) string {
 }
 
 func listRoles(s *discordgo.Session, GuildID string) string {
-	g, err := s.Guild(GuildID)
+	g, err := s.State.Guild(GuildID)
 	if err != nil {
 		fmt.Println(err)
+		return "You fucking broke it~"
 	}
 
-	u, err := s.User("@me")
-	if err != nil {
-		fmt.Println("error obtaining account details,", err)
-	}
-
-	m, err := s.GuildMember(GuildID, u.ID)
+	m, err := s.GuildMember(GuildID, s.State.User.ID)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -139,9 +135,10 @@ func listRoles(s *discordgo.Session, GuildID string) string {
 }
 
 func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) string {
-	g, err := s.Guild(GuildID)
+	g, err := s.State.Guild(GuildID)
 	if err != nil {
 		fmt.Println(err)
+		return "You fucking broke it~"
 	}
 
 	exists, role := roleExists(g, arg)
@@ -215,9 +212,10 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 }
 
 func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string) string {
-	g, err := s.Guild(GuildID)
+	g, err := s.State.Guild(GuildID)
 	if err != nil {
 		fmt.Println(err)
+		return "You fucking broke it~"
 	}
 
 	exists, role := roleExists(g, arg)
