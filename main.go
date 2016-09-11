@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
+	"github.com/softashell/discordgo"
 	"github.com/softashell/lewdbot-discord/brain"
 	"github.com/softashell/lewdbot-discord/commands"
 	"github.com/softashell/lewdbot-discord/config"

@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
+	"github.com/softashell/discordgo"
 	"math/rand"
 	"strings"
 )
@@ -253,7 +253,7 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 		return "I can't touch that group dude, do it yourself~"
 	}
 
-	members, err := s.GuildMembers(GuildID, 0, 1000)
+	members, err := s.GuildMembers(GuildID, "", 1000)
 	if err != nil {
 		fmt.Println(err)
 	}
