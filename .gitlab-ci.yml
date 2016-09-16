@@ -2,7 +2,7 @@ image: golang:latest
 
 before_script:
   - go get -d
-  - cd $GOPATH/src/github.com/softashell/discordgo && git checkout develop
+  - cd $GOPATH/src/github.com/bwmarrin/discordgo && git checkout develop
   - cd $CI_PROJECT_DIR
 
 build:

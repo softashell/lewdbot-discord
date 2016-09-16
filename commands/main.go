@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/softashell/discordgo"
+	"github.com/bwmarrin/discordgo"
 	"math/rand"
 	"strings"
 )
