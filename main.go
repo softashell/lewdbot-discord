@@ -20,11 +20,17 @@ func main() {
 	config.Init()
 	brain.Init()
 
-	log.Println("Filling brain")
+	go func() {
+		start := time.Now()
 
-	brain.LearnFileLines("./data/brain.txt", true)
-	brain.LearnFileLines("./data/dump.txt", true)
-	brain.LearnFileLines("./data/chatlog.txt", false)
+		log.Println("Starting to fill brain")
+
+		brain.LearnFileLines("./data/brain.txt", true)
+		brain.LearnFileLines("./data/dump.txt", true)
+		brain.LearnFileLines("./data/chatlog.txt", false)
+
+		log.Println("Brain filled in", time.Since(start))
+	}()
 
 	connectToDiscord()
 
