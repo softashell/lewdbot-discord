@@ -20,14 +20,30 @@ func main() {
 	config.Init()
 	brain.Init()
 
+	c := config.Get()
+
 	go func() {
 		start := time.Now()
 
 		log.Println("Starting to fill brain")
 
-		brain.LearnFileLines("./data/brain.txt", true)
-		brain.LearnFileLines("./data/dump.txt", true)
-		brain.LearnFileLines("./data/chatlog.txt", false)
+		for _, b := range c.Brain {
+			log.Println("Parsing", b.File)
+
+			err := brain.LearnFileLines(b.File, b.Simple)
+
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+
+		log.Println("Parsing ./data/chatlog.txt")
+		err := brain.LearnFileLines("./data/chatlog.txt", false)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
 		log.Println("Brain filled in", time.Since(start))
 	}()

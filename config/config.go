@@ -8,13 +8,19 @@ import (
 
 type Config struct {
 	loginCredentials `json:"login"`
-	Blacklist        []string `json:"blacklist"`
+	Brain            []brainFile `json:"brain"`
+	Blacklist        []string    `json:"blacklist"`
 }
 
 type loginCredentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Token    string `json:"token"`
+}
+
+type brainFile struct {
+	File   string
+	Simple bool
 }
 
 var c Config
