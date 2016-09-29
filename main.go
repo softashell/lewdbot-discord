@@ -42,7 +42,6 @@ func main() {
 		err := brain.LearnFileLines("./data/chatlog.txt", false)
 		if err != nil {
 			log.Println(err)
-			return
 		}
 
 		log.Println("Brain filled in", time.Since(start))
@@ -127,9 +126,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.ChannelID == "135871025652039681" || m.ChannelID == "145313296617177088" {
-		// Only trigger lewd link parser on #indecency and #lewd
-		// TODO: Add this to config and remove hardcoded values
+	if config.ChannelIsLewd(channel.GuildID, m.ChannelID) {
 		linksFound, reply := lewd.ParseLinks(text)
 
 		if linksFound {
@@ -152,7 +149,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), s.State.User.Username, reply)
 
 		s.ChannelMessageSend(m.ChannelID, reply)
-	} else {
+	} else if !config.GuildIsDumb(channel.GuildID) {
 		// Just learn
 		brain.Learn(text, true)
 	}

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/softashell/lewdbot-discord/config"
 	"math/rand"
 	"strings"
 )
@@ -42,11 +43,55 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 	command := strings.ToLower(text)
 
+	if strings.HasPrefix(command, "!set") {
+		if !config.IsMaster(m.Author.ID) {
+			reply = "Who the **HELL** are you, dude??"
+			return true, reply
+		}
+
+		if len(command) < 6 {
+			return false, ""
+		}
+
+		command = command[5:]
+
+		if strings.HasPrefix(command, "lewd") {
+			if config.ChannelSetLewd(channel.GuildID, channel.ID) {
+				reply = ":ok_hand:"
+			} else {
+				reply = ":clap:"
+			}
+
+			return true, reply
+		} else if strings.HasPrefix(command, "dumb") {
+			if config.GuildSetDumb(channel.GuildID) {
+				reply = ":ok_hand:"
+			} else {
+				reply = ":clap:"
+			}
+
+			return true, reply
+
+		} else if strings.HasPrefix(command, "roles") {
+			if config.SetManageRoles(channel.GuildID) {
+				reply = ":ok_hand:"
+			} else {
+				reply = ":clap:"
+			}
+
+			return true, reply
+		}
+
+		return false, ""
+	}
+
 	if strings.HasPrefix(command, "!8ball") {
 		reply = eightball(text)
 
 		return true, reply
-	} else if channel.GuildID == "111928847846367232" || channel.GuildID == "135827109485608960" {
+	}
+
+	if config.ShouldManageRoles(channel.GuildID) {
 		if strings.HasPrefix(command, "!list") {
 
 			reply = listRoles(s, channel.GuildID)

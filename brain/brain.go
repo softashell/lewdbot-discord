@@ -43,10 +43,7 @@ func Learn(text string, log bool) bool {
 // LearnFileLines Attempts to learn input file
 func LearnFileLines(path string, simple bool) error {
 	f, err := os.Open(path)
-
 	if err != nil {
-		log.Println(err.Error())
-
 		return err
 	}
 
@@ -55,6 +52,7 @@ func LearnFileLines(path string, simple bool) error {
 	var text string
 
 	s := bufio.NewScanner(bufio.NewReader(f))
+
 	for s.Scan() {
 		line := s.Text()
 		if !simple { //Learn all lines between empty lines
@@ -87,7 +85,6 @@ func Reply(message string) string {
 
 func logMessage(message string) {
 	f, err := os.OpenFile("./data/chatlog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
