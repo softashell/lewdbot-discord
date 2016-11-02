@@ -223,6 +223,8 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 }
 
 func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string) string {
+	fmt.Println("removeRole", arg)
+
 	g, err := s.State.Guild(GuildID)
 	if err != nil {
 		fmt.Println(err)
@@ -230,56 +232,52 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 	}
 
 	exists, role := roleExists(g, arg)
-
-	fmt.Println(arg, exists, role)
-
 	if !exists {
 		return "I can't find such group~"
 	}
+
+	fmt.Println("Found?", exists, role)
 
 	member, err := s.GuildMember(GuildID, UserID)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	found := false
-	pos := 0
-
-	for i, _role := range member.Roles {
-		if _role == role.ID {
-			found = true
+	pos := -1
+	for i, r := range member.Roles {
+		if r == role.ID {
 			pos = i
+			break
 		}
 	}
 
-	if !found {
+	if pos < 0 {
 		return fmt.Sprintf("You're already not subscribed to %s~", arg)
 	}
 
 	member.Roles = append(member.Roles[:pos], member.Roles[pos+1:]...)
-
 	err = s.GuildMemberEdit(GuildID, UserID, member.Roles)
 	if err != nil {
 		fmt.Println(err)
 		return "I can't touch that group dude, do it yourself~"
 	}
 
-	members, err := s.GuildMembers(GuildID, "", 1000)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	delete := true
+	for _, member := range g.Members {
+		if member.User.ID == UserID {
+			continue // Ignore self since it's not updated here yet
+		}
 
-	for _, member := range members {
-		for _, _role := range member.Roles {
-			if _role == role.ID {
+		for _, r := range member.Roles {
+			if r == role.ID {
 				delete = false
 				break
 			}
 		}
 	}
-	fmt.Println(delete, role)
+
+	fmt.Println("Should delete it?", delete)
+
 	if delete {
 		err := s.GuildRoleDelete(GuildID, role.ID)
 		if err != nil {
@@ -287,8 +285,10 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 			return fmt.Sprintf("Unsubscribed from but failed to delete %s~", arg)
 		}
 
+		fmt.Println("Unsubscribed and deleted")
 		return fmt.Sprintf("Unsubscribed from and deleted %s~", arg)
 	}
 
+	fmt.Println("Unsubscribed")
 	return fmt.Sprintf("Unsubscribed from %s~", arg)
 }
