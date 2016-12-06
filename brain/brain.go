@@ -1,21 +1,79 @@
 package brain
 
 import (
+	"bitbucket.org/tebeka/snowball"
 	"bufio"
 	"fmt"
 	"github.com/pteichman/fate"
 	"github.com/softashell/lewdbot-discord/regex"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 	"log"
 	"math"
 	"os"
 	"strings"
+	"unicode"
 )
 
 var lewdbrain *fate.Model
 
 // Init Sets the global fate model
 func Init() {
-	lewdbrain = fate.NewModel(fate.Config{})
+	lewdbrain = fate.NewModel(fate.Config{Stemmer: newStemmer()})
+}
+
+type stemmer struct {
+	tran     transform.Transformer
+	snowball *snowball.Stemmer
+}
+
+func newStemmer() stemmer {
+	isRemovable := func(r rune) bool {
+		return unicode.Is(unicode.Mn, r) || unicode.IsPunct(r)
+	}
+
+	stem, _ := snowball.New("english")
+
+	return stemmer{
+		tran:     transform.Chain(norm.NFD, transform.RemoveFunc(isRemovable), norm.NFC),
+		snowball: stem,
+	}
+}
+
+func (s stemmer) Stem(word string) string {
+	str, _, _ := transform.String(s.tran, word)
+	return squish(s.snowball.Stem(strings.ToLower(str)), 2)
+}
+
+// Squish 2+ consecutive characters together during stemming
+func squish(s string, max int) string {
+	var (
+		ret []rune
+		cur rune
+		n   int
+	)
+
+	emit := func(r rune, n int) {
+		if n > max {
+			n = max
+		}
+		for i := 0; i < n; i++ {
+			ret = append(ret, r)
+		}
+	}
+
+	for _, r := range s {
+		if r == cur {
+			n++
+		} else {
+			emit(cur, n)
+			cur = r
+			n = 1
+		}
+	}
+
+	emit(cur, n)
+	return string(ret)
 }
 
 // Learn Attempts to learn and log input text
