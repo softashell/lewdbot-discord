@@ -4,6 +4,15 @@ before_script:
   - go-wrapper download
   - git -C "$GOPATH/src/github.com/bwmarrin/discordgo" checkout develop
 
-build:
+build:linux64:
+  stage: build
+  variables:
+    GOOS: linux
+    GOARCH: amd64
   script:
     - go build
+
+test:
+  stage: test
+  script:
+    - go test
