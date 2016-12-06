@@ -207,9 +207,7 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 		}
 	}
 
-	newRoles := append(member.Roles, role.ID)
-
-	err = s.GuildMemberEdit(GuildID, UserID, newRoles)
+	err = s.GuildMemberRoleAdd(GuildID, UserID, role.ID)
 	if err != nil {
 		fmt.Println(err)
 		return "I can't touch that group dude, do it yourself~"
@@ -250,13 +248,11 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 			break
 		}
 	}
-
 	if pos < 0 {
 		return fmt.Sprintf("You're already not subscribed to %s~", arg)
 	}
 
-	member.Roles = append(member.Roles[:pos], member.Roles[pos+1:]...)
-	err = s.GuildMemberEdit(GuildID, UserID, member.Roles)
+	err = s.GuildMemberRoleRemove(GuildID, UserID, role.ID)
 	if err != nil {
 		fmt.Println(err)
 		return "I can't touch that group dude, do it yourself~"
