@@ -10,48 +10,60 @@ import (
 	"github.com/softashell/lewdbot-discord/regex"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 func main() {
-	os.Mkdir("./data", 0744)
+	if err := os.Mkdir("./data", 0744); err != nil {
+		if !os.IsExist(err) {
+			log.Println(err.Error())
+			return
+		}
+	}
 
 	config.Init()
 	brain.Init()
 
-	c := config.Get()
-
-	go func() {
-		start := time.Now()
-
-		log.Println("Starting to fill brain")
-
-		for _, b := range c.Brain {
-			log.Println("Parsing", b.File)
-
-			err := brain.LearnFileLines(b.File, b.Simple)
-
-			if err != nil {
-				log.Println(err)
-				return
-			}
-		}
-
-		log.Println("Parsing ./data/chatlog.txt")
-		err := brain.LearnFileLines("./data/chatlog.txt", false)
-		if err != nil {
-			log.Println(err)
-		}
-
-		log.Println("Brain filled in", time.Since(start))
-	}()
+	go fillBrain()
 
 	connectToDiscord()
 
 	// Simple way to keep program running until any key press.
 	var input string
 	fmt.Scanln(&input)
+}
+
+func fillBrain() {
+	c := config.Get()
+
+	start := time.Now()
+
+	log.Println("Starting to fill brain")
+
+	for _, b := range c.Brain {
+		log.Println("Parsing", b.File)
+
+		if err := brain.LearnFileLines(b.File, b.Simple); err != nil {
+			log.Println(err)
+			continue
+		}
+	}
+
+	if logs, err := filepath.Glob("./data/chatlog-*.txt"); err != nil {
+		log.Println(err)
+	} else {
+		for _, l := range logs {
+			log.Println("Parsing", l)
+			if err := brain.LearnFileLines(l, false); err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+	}
+
+	log.Println("Brain filled in", time.Since(start))
 }
 
 func connectToDiscord() {

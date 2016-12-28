@@ -12,6 +12,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -142,7 +143,10 @@ func Reply(message string) string {
 }
 
 func logMessage(message string) {
-	f, err := os.OpenFile("./data/chatlog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	t := time.Now()
+	fileName := fmt.Sprintf("./data/chatlog-%d-%02d.txt", t.Year(), t.Month())
+
+	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
