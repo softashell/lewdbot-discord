@@ -112,7 +112,21 @@ func getGalleryMetadata(galleries [][]string) []galleryMetadata {
 	return galleryMetadata
 }
 
-func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []galleryMetadata) {
+func parseGalleryMetadata(s *discordgo.Session, m *discordgo.MessageCreate, galleries []galleryMetadata) {
+
+	if len(m.Embeds) > 0 {
+		for _, e := range m.Embeds {
+			fmt.Println(e.Type, e.URL)
+		}
+
+		// Remove remove all embeds for now
+		_, err := s.ChannelMessageEditEmbed(m.ChannelID, m.ID, &discordgo.MessageEmbed{})
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+	}
+
 	for _, gallery := range galleries {
 		if len(gallery.Error) > 0 {
 			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
@@ -166,7 +180,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 			Fields:    fields,
 		}
 
-		_, err := s.ChannelMessageSendEmbed(channel, &message)
+		_, err := s.ChannelMessageSendEmbed(m.ChannelID, &message)
 		if err != nil {
 			fmt.Println(err.Error())
 		}

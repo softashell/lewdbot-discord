@@ -7,7 +7,7 @@ import (
 )
 
 // ParseLinks Returns gallery metadata from founds links in input
-func ParseLinks(s *discordgo.Session, channel string, text string) bool {
+func ParseLinks(s *discordgo.Session, m *discordgo.MessageCreate, text string) bool {
 	exGalleries := [][]string{} // id, token
 	exPages := [][]string{}     // id, page_token, page_number
 
@@ -19,6 +19,12 @@ func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 
 	// nhentai
 	nhGalleryLinks := regex.NhGalleryLink.FindAllStringSubmatch(text, -1)
+
+	fmt.Println(len(m.Embeds))
+
+	for _, e := range m.Embeds {
+		fmt.Println(e)
+	}
 
 	for _, link := range exGalleryLinks {
 		id := link[1]
@@ -50,10 +56,10 @@ func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 
 	if len(exGalleries) > 0 {
 		galleryMetadata := getGalleryMetadata(exGalleries)
-		parseGalleryMetadata(s, channel, galleryMetadata)
+		parseGalleryMetadata(s, m, galleryMetadata)
 	} else if len(nhGalleries) > 0 {
 		reply := "```css\n>nhentai\n```"
-		_, err := s.ChannelMessageSend(channel, reply)
+		_, err := s.ChannelMessageSend(m.ChannelID, reply)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
