@@ -1,11 +1,11 @@
 package brain
 
 import (
-	"bitbucket.org/tebeka/snowball"
 	"bufio"
 	"fmt"
 	"github.com/pteichman/fate"
 	"github.com/softashell/lewdbot-discord/regex"
+	"github.com/tebeka/snowball"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 	"log"
