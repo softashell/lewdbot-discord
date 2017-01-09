@@ -3,6 +3,7 @@ package lewd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 	"github.com/parnurzeal/gorequest"
 	"html"
 	"strconv"
@@ -30,6 +31,7 @@ type galleryMetadata struct {
 	Token string   `json:"token"`
 	Title string   `json:"title"`
 	Tags  []string `json:"tags"`
+	Thumb string   `json:"thumb"`
 	Error string   `json:"error"`
 }
 
@@ -110,28 +112,12 @@ func getGalleryMetadata(galleries [][]string) []galleryMetadata {
 	return galleryMetadata
 }
 
-func parseGalleryMetadata(galleries []galleryMetadata) string {
-	var text string
-	var includeLink bool
-
-	if len(galleries) > 1 {
-		includeLink = true
-	}
-
+func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []galleryMetadata) {
 	for _, gallery := range galleries {
 		if len(gallery.Error) > 0 {
 			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
 			continue
 		}
-
-		text += fmt.Sprintf("**%s**", html.UnescapeString(gallery.Title))
-
-		if includeLink {
-			// DISCORD A SHIT
-			text += fmt.Sprintf(" *exhentai.org/g/%d/%s/*", gallery.Gid, gallery.Token)
-		}
-
-		text += fmt.Sprintf("\n```")
 
 		var keys []string // Need to keep slice with keys since map doesn't preserve order
 		tags := map[string][]string{}
@@ -158,19 +144,33 @@ func parseGalleryMetadata(galleries []galleryMetadata) string {
 			keys = append(keys, group)
 		}
 
+		var fields []*discordgo.MessageEmbedField
+
+		//		fields := make([]*discordgo.MessageEmbedField, len(keys))
+
 		for _, group := range keys {
-			text += fmt.Sprintf("%s: ", group)
+			var text string
 			for i, tag := range tags[group] {
 				if i < len(tags[group])-1 {
 					text += fmt.Sprintf("%s, ", tag)
 				} else {
-					text += fmt.Sprintf("%s\n", tag)
+					text += fmt.Sprintf("%s", tag)
 				}
 			}
+
+			fields = append(fields, &discordgo.MessageEmbedField{Name: group, Value: text, Inline: true})
 		}
 
-		text += fmt.Sprintf("\n```")
-	}
+		message := discordgo.MessageEmbed{
+			URL:       fmt.Sprintf("https://exhentai.org/g/%d/%s/", gallery.Gid, gallery.Token),
+			Title:     html.UnescapeString(gallery.Title),
+			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: gallery.Thumb},
+			Fields:    fields,
+		}
 
-	return text
+		_, err := s.ChannelMessageSendEmbed(channel, &message)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
 }

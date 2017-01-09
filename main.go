@@ -139,10 +139,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if config.ChannelIsLewd(channel.GuildID, m.ChannelID) {
-		linksFound, reply := lewd.ParseLinks(text)
-
-		if linksFound {
-			s.ChannelMessageSend(m.ChannelID, reply)
+		if lewd.ParseLinks(s, m.ChannelID, text) {
 			return
 		}
 	}

@@ -1,11 +1,13 @@
 package lewd
 
 import (
+	"fmt"
+	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 )
 
 // ParseLinks Returns gallery metadata from founds links in input
-func ParseLinks(text string) (bool, string) {
+func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 	exGalleries := [][]string{} // id, token
 	exPages := [][]string{}     // id, page_token, page_number
 
@@ -46,17 +48,19 @@ func ParseLinks(text string) (bool, string) {
 		nhGalleries = append(nhGalleries, id)
 	}
 
-	var reply string
-
 	if len(exGalleries) > 0 {
 		galleryMetadata := getGalleryMetadata(exGalleries)
-		reply = parseGalleryMetadata(galleryMetadata)
+		parseGalleryMetadata(s, channel, galleryMetadata)
 	} else if len(nhGalleries) > 0 {
-		reply = "```css\n>nhentai\n```"
+		reply := "```css\n>nhentai\n```"
+		_, err := s.ChannelMessageSend(channel, reply)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	} else {
 		// Didn't find anything
-		return false, reply
+		return false
 	}
 
-	return true, reply
+	return true
 }
