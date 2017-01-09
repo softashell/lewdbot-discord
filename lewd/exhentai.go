@@ -146,8 +146,6 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 
 		var fields []*discordgo.MessageEmbedField
 
-		//		fields := make([]*discordgo.MessageEmbedField, len(keys))
-
 		for _, group := range keys {
 			var text string
 			for i, tag := range tags[group] {
