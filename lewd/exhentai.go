@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	apiURL = "http://g.e-hentai.org/api.php"
+	apiURL = "https://e-hentai.org/api.php"
 )
 
 type ehentaiRequest struct {
@@ -36,54 +36,42 @@ type galleryMetadata struct {
 }
 
 func makeRequest(method string, list [][]string) []galleryMetadata {
-
-	// Make json struct
 	jsonStruct := ehentaiRequest{
 		Method: method,
 	}
 
 	switch method {
 	case "gdata":
-		{
-			jsonStruct.Gidlist = list
-			jsonStruct.Namespace = 1
-		}
+		jsonStruct.Gidlist = list
+		jsonStruct.Namespace = 1
 	case "gtoken":
-		{
-			jsonStruct.Pagelist = list
-		}
+		jsonStruct.Pagelist = list
 	}
 
 	// Convert json object to string
 	jsonString, err := json.Marshal(jsonStruct)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Failed to marshal JSON API request", err.Error())
 	}
 
 	// Post the request
-	_, reply, errs := gorequest.New().Post(apiURL).Send(string(jsonString)).EndBytes()
-
-	if err != nil {
-		for _, err := range errs {
-			fmt.Println(err.Error())
-		}
+	resp, reply, errs := gorequest.New().Post(apiURL).Send(string(jsonString)).EndBytes()
+	for _, err := range errs {
+		fmt.Println(err.Error())
 	}
 
 	var response ehentaiResponse
-
 	if err := json.Unmarshal(reply, &response); err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Failed to unmarshal JSON API response", err.Error())
+		fmt.Println(resp.Status)
+		fmt.Println(string(reply))
 	}
 
 	switch method {
 	case "gdata":
-		{
-			return response.Gmetadata
-		}
+		return response.Gmetadata
 	case "gtoken":
-		{
-			return response.Tokenlist
-		}
+		return response.Tokenlist
 	}
 
 	return []galleryMetadata{}
