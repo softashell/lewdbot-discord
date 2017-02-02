@@ -202,7 +202,7 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 	if exists {
 		for _, _role := range member.Roles {
 			if _role == role.ID {
-				return fmt.Sprintf("You're already subscribed to %s ~", arg)
+				return fmt.Sprintf("You're already subscribed to %s~", arg)
 			}
 		}
 	}

@@ -36,9 +36,7 @@ func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 	}
 
 	if len(exPages) > 0 {
-		for _, gallery := range getGalleryTokens(exPages) {
-			exGalleries = append(exGalleries, gallery)
-		}
+		exGalleries = append(exGalleries, getGalleryTokens(exPages)...)
 	}
 
 	// Doesn't actually do anything with it yet, maybe later
