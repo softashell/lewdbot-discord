@@ -138,7 +138,7 @@ func eightball(text string) string {
 }
 
 func dice(text string, author *discordgo.User) string {
-	match := regexp.MustCompile(`(\d)+d(\d+)`).FindStringSubmatch(text)
+	match := regexp.MustCompile(`(\d+)d(\d+)`).FindStringSubmatch(text)
 
 	if len(match) < 3 {
 		return fmt.Sprintf("%s, you fucked up~", author.Username)
