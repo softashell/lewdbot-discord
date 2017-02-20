@@ -5,6 +5,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/config"
 	"math/rand"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -89,6 +91,10 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 		reply = eightball(text)
 
 		return true, reply
+	} else if strings.HasPrefix(command, "!roll") {
+		reply = dice(text[5:], m.Author)
+
+		return true, reply
 	}
 
 	if config.ShouldManageRoles(channel.GuildID) {
@@ -129,4 +135,32 @@ func eightball(text string) string {
 	}
 
 	return answer
+}
+
+func dice(text string, author *discordgo.User) string {
+	match := regexp.MustCompile(`(\d)+d(\d+)`).FindStringSubmatch(text)
+
+	if len(match) < 3 {
+		return fmt.Sprintf("%s, you fucked up~", author.Username)
+	}
+
+	dice, err := strconv.Atoi(match[1])
+	sides, err := strconv.Atoi(match[2])
+
+	if err != nil {
+		return fmt.Sprintf("%s, you fucked up~", author.Username)
+	}
+
+	if dice <= 0 || sides <= 0 {
+		return fmt.Sprintf("%s, fuck off~", author.Username)
+	}
+
+	roll := 0
+
+	for dice > 0 {
+		roll += rand.Intn(sides) + 1
+		dice--
+	}
+
+	return fmt.Sprintf("%s, you rolled %d~", author.Username, roll)
 }
