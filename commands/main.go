@@ -85,9 +85,7 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 		}
 
 		return false, ""
-	}
-
-	if strings.HasPrefix(command, "!8ball") {
+	} else if strings.HasPrefix(command, "!8ball") {
 		reply = eightball(text)
 
 		return true, reply
@@ -95,9 +93,7 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 		reply = dice(text[5:], m.Author)
 
 		return true, reply
-	}
-
-	if config.ShouldManageRoles(channel.GuildID) {
+	} else if config.ShouldManageRoles(channel.GuildID) {
 		if strings.HasPrefix(command, "!list") {
 			if len(text) > 6 {
 				reply = listRoleMembers(s, channel.GuildID, text[6:])
