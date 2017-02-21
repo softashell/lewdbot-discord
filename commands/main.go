@@ -151,7 +151,7 @@ func dice(text string, author *discordgo.User) string {
 		return fmt.Sprintf("%s, you fucked up~", author.Username)
 	}
 
-	if dice <= 0 || sides <= 0 {
+	if dice <= 0 || sides <= 0 || dice > 100 || sides > 100 {
 		return fmt.Sprintf("%s, fuck off~", author.Username)
 	}
 
