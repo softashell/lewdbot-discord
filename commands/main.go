@@ -151,6 +151,10 @@ func dice(text string, author *discordgo.User) string {
 		return fmt.Sprintf("%s, fuck off~", author.Username)
 	}
 
+	if sides == 1 {
+		return fmt.Sprintf("%s, you rolled %d~ What else did you expect?~", author.Username, dice*sides)
+	}
+
 	roll := 0
 
 	for dice > 0 {
