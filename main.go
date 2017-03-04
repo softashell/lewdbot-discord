@@ -132,6 +132,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			fmt.Println("s.ChannelMessageSend >> ", err)
 		}
+
 		return
 	} else if strings.HasPrefix(text, "!") || strings.HasPrefix(text, ".") || strings.HasPrefix(text, "bot.") {
 		// Ignore shit meant for other bots
@@ -151,6 +152,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if channel.IsPrivate || isMentioned {
+		s.ChannelTyping(m.ChannelID)
+
 		reply := brain.Reply(text)
 		reply = regex.Lewdbot.ReplaceAllString(reply, m.Author.Username)
 
