@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/brain"
 	"github.com/softashell/lewdbot-discord/commands"
 	"github.com/softashell/lewdbot-discord/config"
 	"github.com/softashell/lewdbot-discord/lewd"
 	"github.com/softashell/lewdbot-discord/regex"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,11 +16,10 @@ import (
 )
 
 func main() {
-	if err := os.Mkdir("./data", 0744); err != nil {
-		if !os.IsExist(err) {
-			log.Println(err.Error())
-			return
-		}
+	err := os.Mkdir("./data", 0700)
+	if err != nil && !os.IsExist(err) {
+		log.Errorln("Can't create data directory", err)
+		return
 	}
 
 	config.Init()
@@ -46,19 +45,23 @@ func fillBrain() {
 		log.Println("Parsing", b.File)
 
 		if err := brain.LearnFileLines(b.File, b.Simple); err != nil {
-			log.Println(err)
-			continue
+			log.WithFields(log.Fields{
+				"file":   b.File,
+				"simple": b.Simple,
+			}).Warn(err)
 		}
 	}
 
 	if logs, err := filepath.Glob("./data/chatlog-*.txt"); err != nil {
-		log.Println(err)
+		log.Error(err)
 	} else {
 		for _, l := range logs {
 			log.Println("Parsing", l)
+
 			if err := brain.LearnFileLines(l, false); err != nil {
-				log.Println(err)
-				continue
+				log.WithFields(log.Fields{
+					"file": l,
+				}).Warn(err)
 			}
 		}
 	}
@@ -75,7 +78,7 @@ func connectToDiscord() {
 
 	dg, err := discordgo.New(c.Email, c.Password, "Bot "+c.Token)
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err)
 		return
 	}
 
@@ -88,13 +91,14 @@ func connectToDiscord() {
 	// Verify the Token is valid and grab user information
 	dg.State.User, err = dg.User("@me")
 	if err != nil {
-		log.Printf("error fetching user information, %s\n", err)
+		log.Errorf("error fetching user information, %s\n", err)
+		return
 	}
 
 	// Open websocket connection
 	err = dg.Open()
 	if err != nil {
-		log.Printf("error opening connection to Discord, %s\n", err)
+		log.Errorf("error opening connection to Discord, %s\n", err)
 		return
 	}
 
@@ -107,7 +111,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	channel, _ := s.State.Channel(m.ChannelID)
+	channel, err := s.State.Channel(m.ChannelID)
+	if err != nil {
+		log.Warn("s.State.Channel >> ", err)
+	}
 
 	if channel.IsPrivate {
 		channel.Name = "direct message"
@@ -126,11 +133,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), m.Author.Username, text)
 
 	commandFound, reply := commands.ParseMessage(s, m, text)
-
 	if commandFound {
 		_, err := s.ChannelMessageSend(m.ChannelID, reply)
 		if err != nil {
-			fmt.Println("s.ChannelMessageSend >> ", err)
+			log.Warn("s.ChannelMessageSend >> ", err)
 		}
 
 		return
@@ -152,7 +158,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if channel.IsPrivate || isMentioned {
-		s.ChannelTyping(m.ChannelID)
+		err := s.ChannelTyping(m.ChannelID)
+		if err != nil {
+			log.Warn("s.ChannelTyping >> ", err)
+		}
 
 		reply := brain.Reply(text)
 		reply = regex.Lewdbot.ReplaceAllString(reply, m.Author.Username)
@@ -160,7 +169,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Log our reply
 		fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), s.State.User.Username, reply)
 
-		s.ChannelMessageSend(m.ChannelID, reply)
+		_, err = s.ChannelMessageSend(m.ChannelID, reply)
+		if err != nil {
+			log.Warn("s.ChannelMessageSend >> ", err)
+		}
+
 	} else if !config.GuildIsDumb(channel.GuildID) {
 		// Just learn
 		brain.Learn(text, true)

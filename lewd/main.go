@@ -1,7 +1,7 @@
 package lewd
 
 import (
-	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 )
@@ -53,7 +53,7 @@ func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 		reply := "```css\n>nhentai\n```"
 		_, err := s.ChannelMessageSend(channel, reply)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Warn("s.ChannelMessageSend", err)
 		}
 	} else {
 		// Didn't find anything

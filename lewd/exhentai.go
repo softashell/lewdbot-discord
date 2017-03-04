@@ -1,8 +1,8 @@
 package lewd
 
 import (
-	"encoding/json"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/parnurzeal/gorequest"
 	"html"
@@ -48,23 +48,19 @@ func makeRequest(method string, list [][]string) []galleryMetadata {
 		jsonStruct.Pagelist = list
 	}
 
-	// Convert json object to string
-	jsonString, err := json.Marshal(jsonStruct)
-	if err != nil {
-		fmt.Println("Failed to marshal JSON API request", err.Error())
-	}
+	var response ehentaiResponse
 
 	// Post the request
-	resp, reply, errs := gorequest.New().Post(apiURL).Send(string(jsonString)).EndBytes()
+	resp, reply, errs := gorequest.New().Post(apiURL).SendStruct(jsonStruct).EndStruct(&response)
 	for _, err := range errs {
-		fmt.Println(err.Error())
-	}
+		log.Debugf("%+v", jsonStruct)
 
-	var response ehentaiResponse
-	if err := json.Unmarshal(reply, &response); err != nil {
-		fmt.Println("Failed to unmarshal JSON API response", err.Error())
-		fmt.Println(resp.Status)
-		fmt.Println(string(reply))
+		log.WithFields(log.Fields{
+			"status": resp.Status,
+			"reply":  reply,
+		}).Error("API Request failed", err)
+
+		return []galleryMetadata{}
 	}
 
 	switch method {
@@ -84,7 +80,7 @@ func getGalleryTokens(pagelist [][]string) [][]string {
 
 	for _, gallery := range tokenList {
 		if len(gallery.Error) > 0 {
-			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
+			log.Warnf("gid: %d error: %s", gallery.Gid, gallery.Error)
 			continue
 		}
 
@@ -103,8 +99,7 @@ func getGalleryMetadata(galleries [][]string) []galleryMetadata {
 func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []galleryMetadata) {
 	for _, gallery := range galleries {
 		if len(gallery.Error) > 0 {
-			fmt.Printf("gid: %d error: %s", gallery.Gid, gallery.Error)
-			continue
+			log.Warnf("gid: %d error: %s", gallery.Gid, gallery.Error)
 		}
 
 		var keys []string // Need to keep slice with keys since map doesn't preserve order
@@ -156,7 +151,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 
 		_, err := s.ChannelMessageSendEmbed(channel, &message)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Warn("s.ChannelMessageSendEmbed >>", err)
 		}
 	}
 }

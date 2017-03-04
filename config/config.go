@@ -2,8 +2,8 @@ package config
 
 import (
 	"encoding/json"
+	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
-	"log"
 )
 
 type Config struct {
@@ -52,7 +52,7 @@ func Init() {
 	}
 
 	if (len(c.Email) == 0 || len(c.Password) == 0) && len(c.Token) == 0 {
-		log.Println("Unable to load login information, did you set it in config?")
+		log.Fatal("Unable to load login information, did you set it in config?")
 	}
 
 	Save()
@@ -63,30 +63,37 @@ func Get() *Config {
 }
 
 func Save() {
-	_json, _ := json.MarshalIndent(c, "", "  ")
-
-	err := ioutil.WriteFile("./data/config.json", []byte(_json), 0644)
+	_json, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile("./data/config.json", []byte(_json), 0644)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
 func Print(c Config) {
 	// Print out current config
-	_json, _ := json.MarshalIndent(c, "", "\t")
+	_json, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Println(string(_json))
 }
 
 func loadConfigFromFile(filename string) Config {
 	fileDump, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err)
 	}
 
 	var config = Config{}
 
 	if err := json.Unmarshal(fileDump, &config); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err)
 	}
 
 	return config

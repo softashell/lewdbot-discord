@@ -3,12 +3,12 @@ package brain
 import (
 	"bufio"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/pteichman/fate"
 	"github.com/softashell/lewdbot-discord/regex"
 	"github.com/tebeka/snowball"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
-	"log"
 	"math"
 	"os"
 	"strings"
@@ -33,7 +33,10 @@ func newStemmer() stemmer {
 		return unicode.Is(unicode.Mn, r) || unicode.IsPunct(r)
 	}
 
-	stem, _ := snowball.New("english")
+	stem, err := snowball.New("english")
+	if err != nil {
+		log.Fatal("Unable to create new stemmer", err)
+	}
 
 	return stemmer{
 		tran:     transform.Chain(norm.NFD, transform.RemoveFunc(isRemovable), norm.NFC),
@@ -148,13 +151,13 @@ func logMessage(message string) {
 
 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Error("Unable to open log", err)
 	}
 
 	defer f.Close()
 
 	if _, err = f.WriteString(fmt.Sprintf("%s\n\n", message)); err != nil {
-		log.Println(err)
+		log.Error("Unable to write in log", err)
 	}
 }
 
