@@ -122,7 +122,7 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 }
 
 func eightball(text string) string {
-	answer := eightballResponses[rand.Intn(len(eightballResponses)-1)]
+	answer := eightballResponses[rand.Intn(len(eightballResponses))]
 
 	if len(text) > 7 {
 		question := text[7:]
