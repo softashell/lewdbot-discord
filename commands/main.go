@@ -2,12 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/softashell/lewdbot-discord/config"
 	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/bwmarrin/discordgo"
+	"github.com/softashell/lewdbot-discord/config"
 )
 
 var eightballResponses = []string{
@@ -39,7 +41,7 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 	channel, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		fmt.Printf("s.Channel(%s) >> %s\n", m.ChannelID, err.Error())
+		log.Errorf("s.Channel(%s) >> %s\n", m.ChannelID, err)
 		return false, reply
 	}
 
@@ -141,8 +143,11 @@ func dice(text string, author *discordgo.User) string {
 	}
 
 	dice, err := strconv.Atoi(match[1])
-	sides, err := strconv.Atoi(match[2])
+	if err != nil {
+		return fmt.Sprintf("%s, you fucked up~", author.Username)
+	}
 
+	sides, err := strconv.Atoi(match[2])
 	if err != nil {
 		return fmt.Sprintf("%s, you fucked up~", author.Username)
 	}
