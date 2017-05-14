@@ -2,8 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type Config struct {
@@ -15,9 +16,7 @@ type Config struct {
 }
 
 type loginCredentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Token    string `json:"token"`
+	Token string `json:"token"`
 }
 
 type brainFile struct {
@@ -51,7 +50,7 @@ func Init() {
 		}
 	}
 
-	if (len(c.Email) == 0 || len(c.Password) == 0) && len(c.Token) == 0 {
+	if len(c.Token) == 0 {
 		log.Fatal("Unable to load login information, did you set it in config?")
 	}
 

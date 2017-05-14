@@ -2,6 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/brain"
@@ -9,10 +14,6 @@ import (
 	"github.com/softashell/lewdbot-discord/config"
 	"github.com/softashell/lewdbot-discord/lewd"
 	"github.com/softashell/lewdbot-discord/regex"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 func main() {
@@ -76,7 +77,7 @@ func connectToDiscord() {
 
 	c := config.Get()
 
-	dg, err := discordgo.New(c.Email, c.Password, "Bot "+c.Token)
+	dg, err := discordgo.New("Bot " + c.Token)
 	if err != nil {
 		log.Error(err)
 		return
