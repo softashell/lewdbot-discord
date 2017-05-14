@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -23,6 +24,9 @@ func main() {
 		return
 	}
 
+	interrupt := make(chan os.Signal)
+	signal.Notify(interrupt, os.Interrupt)
+
 	config.Init()
 	brain.Init()
 
@@ -30,9 +34,9 @@ func main() {
 
 	connectToDiscord()
 
-	// Simple way to keep program running until any key press.
-	var input string
-	fmt.Scanln(&input)
+	<-interrupt
+
+	log.Info("Shutting down")
 }
 
 func fillBrain() {
