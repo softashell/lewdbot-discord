@@ -8,6 +8,11 @@ import (
 	"github.com/softashell/lewdbot-discord/config"
 )
 
+const (
+	msgOn  = ":ok_hand:"
+	msgOff = ":clap:"
+)
+
 func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string) (bool, string) {
 	var reply string
 
@@ -33,26 +38,26 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 		if strings.HasPrefix(command, "lewd") {
 			if config.ChannelSetLewd(channel.GuildID, channel.ID) {
-				reply = ":ok_hand:"
+				reply = msgOn
 			} else {
-				reply = ":clap:"
+				reply = msgOff
 			}
 
 			return true, reply
 		} else if strings.HasPrefix(command, "dumb") {
 			if config.GuildSetDumb(channel.GuildID) {
-				reply = ":ok_hand:"
+				reply = msgOn
 			} else {
-				reply = ":clap:"
+				reply = msgOff
 			}
 
 			return true, reply
 
 		} else if strings.HasPrefix(command, "roles") {
 			if config.SetManageRoles(channel.GuildID) {
-				reply = ":ok_hand:"
+				reply = msgOn
 			} else {
-				reply = ":clap:"
+				reply = msgOff
 			}
 
 			return true, reply
