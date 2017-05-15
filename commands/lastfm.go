@@ -10,6 +10,8 @@ import (
 
 	"fmt"
 
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -36,6 +38,11 @@ type lastfmreply struct {
 }
 
 func registerLastfmProfile(UserID string, arg string) string {
+	arg = strings.TrimSpace(arg)
+
+	if len(arg) > 15 || len(arg) < 2 {
+		return "Are you trying to trick me?"
+	}
 
 	config.SetLastfmUsername(UserID, arg)
 
