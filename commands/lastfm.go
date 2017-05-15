@@ -1,6 +1,9 @@
 package commands
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/parnurzeal/gorequest"
 	"github.com/softashell/lewdbot-discord/config"
@@ -10,7 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-const apiURL = "http://ws.audioscrobbler.com/2.0/?method="
+const apiURL = "http://ws.audioscrobbler.com/2.0/?"
 
 type lastfmreply struct {
 	Recenttracks struct {
@@ -26,8 +29,7 @@ type lastfmreply struct {
 				Nowplaying string `json:"nowplaying"`
 			} `json:"@attr,omitempty"`
 			Date struct {
-				Uts  string `json:"uts"`
-				Text string `json:"#text"`
+				Uts string `json:"uts"`
 			} `json:"date,omitempty"`
 		} `json:"track"`
 	} `json:"recenttracks"`
@@ -91,7 +93,7 @@ func spamNowPlayingServer(s *discordgo.Session, GuildID string) string {
 }
 
 func getNowPlaying(username string) (string, error) {
-	params := fmt.Sprintf("user.getRecentTracks&user=%s&api_key=%s&limit=1&format=json", username, config.GetLastfmKey())
+	params := fmt.Sprintf("method=user.getRecentTracks&user=%s&api_key=%s&limit=1&format=json", username, config.GetLastfmKey())
 	url := apiURL + params
 
 	var response lastfmreply
@@ -111,10 +113,6 @@ func getNowPlaying(username string) (string, error) {
 		return "", fmt.Errorf("Didn't get any tracks from this nerd")
 	}
 
-	if len(response.Recenttracks.Track[0].Attr.Nowplaying) < 1 {
-		return "", fmt.Errorf("Nothing playing")
-	}
-
 	artist := response.Recenttracks.Track[0].Artist.Text
 	track := response.Recenttracks.Track[0].Name
 
@@ -122,9 +120,26 @@ func getNowPlaying(username string) (string, error) {
 		return "", fmt.Errorf("Empty metadata")
 	}
 
-	var out string
+	out := fmt.Sprintf("%s - %s", artist, track)
 
-	out = fmt.Sprintf("%s - %s", artist, track)
+	if len(response.Recenttracks.Track[0].Attr.Nowplaying) < 1 {
+		i, err := strconv.ParseInt(response.Recenttracks.Track[0].Date.Uts, 10, 64)
+		if err != nil {
+			log.Warning(err)
+		} else {
+			duration := time.Since(time.Unix(i, 0))
+
+			if duration.Hours() < 6 {
+				if duration.Minutes() >= 60 {
+					out += fmt.Sprintf(" [%.fh ago]", duration.Hours())
+				} else if duration.Seconds() >= 60 {
+					out += fmt.Sprintf(" [%.fm ago]", duration.Minutes())
+				}
+			} else {
+				return out, fmt.Errorf("Last track played too long ago")
+			}
+		}
+	}
 
 	return out, nil
 }
