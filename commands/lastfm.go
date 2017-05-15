@@ -53,6 +53,8 @@ func spamNowPlayingUser(UserID string) string {
 	np, err := getNowPlaying(username)
 	if err != nil {
 		log.Errorf("spamNowPlayingUser >> %v", err)
+
+		np = "Maybe you should try playing something~"
 	}
 
 	return "```" + np + "```"
