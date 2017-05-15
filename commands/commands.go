@@ -101,13 +101,23 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 	if config.GuildHasLastfmEnabled(channel.GuildID) {
 		if strings.HasPrefix(command, "!np") {
+			err = s.ChannelTyping(m.ChannelID)
+			if err != nil {
+				log.Warn("s.ChannelTyping >> ", err)
+			}
+
 			if strings.HasPrefix(command, "!np set") && len(text) > 8 {
 				reply = registerLastfmProfile(m.Author.ID, text[8:])
 			} else {
 				reply = spamNowPlayingUser(m.Author.ID)
 			}
+
 			return true, reply
 		} else if strings.HasPrefix(command, "!wp") {
+			err = s.ChannelTyping(m.ChannelID)
+			if err != nil {
+				log.Warn("s.ChannelTyping >> ", err)
+			}
 
 			reply = spamNowPlayingServer(s, channel.GuildID)
 
