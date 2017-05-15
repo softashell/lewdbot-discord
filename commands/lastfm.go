@@ -18,6 +18,8 @@ import (
 const apiURL = "http://ws.audioscrobbler.com/2.0/?"
 
 type lastfmreply struct {
+	Error        int    `json:"error"`
+	Message      string `json:"message"`
 	Recenttracks struct {
 		Track []struct {
 			Name   string `json:"name"`
@@ -114,6 +116,11 @@ func getNowPlaying(username string) (string, error) {
 		}).Error("API Request failed", err)
 
 		return "", fmt.Errorf("You fucking broke it")
+	}
+
+	if response.Error > 0 {
+		log.Error(response.Error, response.Message)
+		return "", fmt.Errorf("%d %s", response.Error, response.Message)
 	}
 
 	if len(response.Recenttracks.Track) < 1 {
