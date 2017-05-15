@@ -2,7 +2,9 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -13,10 +15,17 @@ type Config struct {
 	Blacklist        []string                 `json:"blacklist"`
 	Guilds           map[string]guildSettings `json:"guilds"`
 	Masters          []string                 `json:"masters"`
+	lastfm           `json:"lastfm"`
 }
 
 type loginCredentials struct {
 	Token string `json:"token"`
+}
+
+type lastfm struct {
+	lock      sync.RWMutex
+	Key       string            `json:"api_key"`
+	Usernames map[string]string `json:"usernames"`
 }
 
 type brainFile struct {
@@ -28,6 +37,7 @@ type guildSettings struct {
 	Channels    map[string]channelSettings `json:"channels"`
 	Dumb        bool                       `json:"dumb"`
 	ManageRoles bool                       `json:"roles"`
+	Lastfm      bool                       `json:"lastfm"`
 }
 
 type channelSettings struct {
@@ -48,6 +58,11 @@ func Init() {
 		if g.Channels == nil {
 			g.Channels = make(map[string]channelSettings)
 		}
+	}
+
+	c.lastfm.lock = sync.RWMutex{}
+	if c.lastfm.Usernames == nil {
+		c.lastfm.Usernames = make(map[string]string)
 	}
 
 	if len(c.Token) == 0 {
@@ -124,6 +139,22 @@ func GuildIsDumb(guild string) bool {
 	return c.Guilds[guild].Dumb
 }
 
+func GuildSetLastfm(guild string) bool {
+	g := c.Guilds[guild]
+
+	g.Lastfm = !g.Lastfm
+
+	c.Guilds[guild] = g
+
+	Save()
+
+	return g.Lastfm
+}
+
+func GuildHasLastfmEnabled(guild string) bool {
+	return c.Guilds[guild].Lastfm
+}
+
 func ChannelSetLewd(guild string, channel string) bool {
 	g := c.Guilds[guild]
 
@@ -161,4 +192,31 @@ func SetManageRoles(guild string) bool {
 
 func ShouldManageRoles(guild string) bool {
 	return c.Guilds[guild].ManageRoles
+}
+
+func SetLastfmUsername(UserID string, username string) {
+	c.lastfm.lock.Lock()
+	defer c.lastfm.lock.Unlock()
+
+	log.Println("Setting username for", UserID, "to", username)
+
+	c.lastfm.Usernames[UserID] = username
+
+	Save()
+}
+
+func GetLastfmUsername(UserID string) (string, error) {
+	c.lastfm.lock.RLock()
+	defer c.lastfm.lock.RUnlock()
+
+	username := c.lastfm.Usernames[UserID]
+	if len(username) < 1 {
+		return "", fmt.Errorf("Couldn't find saved last.fm username")
+	}
+
+	return username, nil
+}
+
+func GetLastfmKey() string {
+	return c.lastfm.Key
 }

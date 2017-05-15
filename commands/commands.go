@@ -52,6 +52,14 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			}
 
 			return true, reply
+		} else if strings.HasPrefix(command, "lastfm") {
+			if config.GuildSetLastfm(channel.GuildID) {
+				reply = msgOn
+			} else {
+				reply = msgOff
+			}
+
+			return true, reply
 
 		} else if strings.HasPrefix(command, "roles") {
 			if config.SetManageRoles(channel.GuildID) {
@@ -64,15 +72,9 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 		}
 
 		return false, ""
-	} else if strings.HasPrefix(command, "!8ball") {
-		reply = eightball(text)
+	}
 
-		return true, reply
-	} else if strings.HasPrefix(command, "!roll") {
-		reply = dice(text[5:], m.Author)
-
-		return true, reply
-	} else if config.ShouldManageRoles(channel.GuildID) {
+	if config.ShouldManageRoles(channel.GuildID) {
 		if strings.HasPrefix(command, "!list") {
 			if len(text) > 6 {
 				reply = listRoleMembers(s, channel.GuildID, text[6:])
@@ -95,6 +97,32 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			}
 			return true, reply
 		}
+	}
+
+	if config.GuildHasLastfmEnabled(channel.GuildID) {
+		if strings.HasPrefix(command, "!np") {
+			if len(text) > 4 {
+				reply = registerLastfmProfile(m.Author.ID, text[4:])
+			} else {
+				reply = spamNowPlayingUser(m.Author.ID)
+			}
+			return true, reply
+		} else if strings.HasPrefix(command, "!wp") {
+
+			reply = spamNowPlayingServer(s, channel.GuildID)
+
+			return true, reply
+		}
+	}
+
+	if strings.HasPrefix(command, "!8ball") {
+		reply = eightball(text)
+
+		return true, reply
+	} else if strings.HasPrefix(command, "!roll") {
+		reply = dice(text[5:], m.Author)
+
+		return true, reply
 	}
 
 	return false, reply
