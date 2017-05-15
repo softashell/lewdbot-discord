@@ -36,11 +36,11 @@ type lastfmreply struct {
 }
 
 func registerLastfmProfile(UserID string, arg string) string {
-	var out string
 
 	config.SetLastfmUsername(UserID, arg)
 
-	out = spamNowPlayingUser(UserID)
+	out := fmt.Sprintf("Changed your last.fm username to %q", arg)
+	out += spamNowPlayingUser(UserID)
 
 	return out
 }
@@ -49,7 +49,7 @@ func spamNowPlayingUser(UserID string) string {
 	username, err := config.GetLastfmUsername(UserID)
 	if err != nil {
 		log.Errorf("spamNowPlayingUser >> %v", err)
-		return "You haven't registered your last.fm profile yet! Use ``!np username`` to register~"
+		return "You haven't registered your last.fm profile yet! Use ``!np set username`` to register~"
 	}
 
 	np, err := getNowPlaying(username)

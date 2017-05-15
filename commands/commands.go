@@ -101,8 +101,8 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 	if config.GuildHasLastfmEnabled(channel.GuildID) {
 		if strings.HasPrefix(command, "!np") {
-			if len(text) > 4 {
-				reply = registerLastfmProfile(m.Author.ID, text[4:])
+			if strings.HasPrefix(command, "!np set") && len(text) > 8 {
+				reply = registerLastfmProfile(m.Author.ID, text[8:])
 			} else {
 				reply = spamNowPlayingUser(m.Author.ID)
 			}
