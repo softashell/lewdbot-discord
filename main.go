@@ -111,8 +111,7 @@ func connectToDiscord() {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID {
-		// Ignore self
+	if m.Author.ID == s.State.User.ID || len(m.Message.Content) < 1 {
 		return
 	}
 
@@ -121,7 +120,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		log.Warn("s.State.Channel >> ", err)
 	}
 
-	if channel.IsPrivate {
+	if channel.Type == discordgo.ChannelTypeDM {
 		channel.Name = "direct message"
 	}
 
@@ -162,7 +161,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		isMentioned = true
 	}
 
-	if channel.IsPrivate || isMentioned {
+	if channel.Type == discordgo.ChannelTypeDM || isMentioned {
 		err := s.ChannelTyping(m.ChannelID)
 		if err != nil {
 			log.Warn("s.ChannelTyping >> ", err)
