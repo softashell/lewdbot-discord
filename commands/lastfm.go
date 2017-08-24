@@ -108,7 +108,7 @@ func getNowPlaying(username string) (string, error) {
 	var response lastfmreply
 
 	// Post the request
-	_, reply, errs := gorequest.New().Get(url).EndStruct(&response)
+	_, reply, errs := gorequest.New().Get(url).Timeout(5 * time.Second).EndStruct(&response)
 	for _, err := range errs {
 		log.WithFields(log.Fields{
 			"reply": reply,
