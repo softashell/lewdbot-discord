@@ -44,6 +44,14 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			}
 
 			return true, reply
+		} else if strings.HasPrefix(command, "spam") {
+			if config.ChannelSetSpam(channel.GuildID, channel.ID) {
+				reply = msgOn
+			} else {
+				reply = msgOff
+			}
+
+			return true, reply
 		} else if strings.HasPrefix(command, "dumb") {
 			if config.GuildSetDumb(channel.GuildID) {
 				reply = msgOn

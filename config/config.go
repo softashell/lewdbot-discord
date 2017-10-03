@@ -42,6 +42,7 @@ type guildSettings struct {
 
 type channelSettings struct {
 	Lewd   bool `json:"lewd"`
+	Spam   bool `json:"spam"`
 	Pso2eq bool `json:"pso2"`
 }
 
@@ -176,6 +177,29 @@ func ChannelSetLewd(guild string, channel string) bool {
 
 func ChannelIsLewd(guild string, channel string) bool {
 	return c.Guilds[guild].Channels[channel].Lewd
+}
+
+func ChannelSetSpam(guild string, channel string) bool {
+	g := c.Guilds[guild]
+
+	if g.Channels == nil {
+		g.Channels = make(map[string]channelSettings)
+	}
+
+	ch := g.Channels[channel]
+
+	ch.Spam = !ch.Spam
+
+	g.Channels[channel] = ch
+	c.Guilds[guild] = g
+
+	Save()
+
+	return ch.Spam
+}
+
+func ChannelShouldSpam(guild string, channel string) bool {
+	return c.Guilds[guild].Channels[channel].Spam
 }
 
 func SetManageRoles(guild string) bool {

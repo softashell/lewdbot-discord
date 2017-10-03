@@ -161,7 +161,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		isMentioned = true
 	}
 
-	if channel.Type == discordgo.ChannelTypeDM || isMentioned {
+	if channel.Type == discordgo.ChannelTypeDM || isMentioned || config.ChannelShouldSpam(channel.GuildID, m.ChannelID) {
 		err := s.ChannelTyping(m.ChannelID)
 		if err != nil {
 			log.Warn("s.ChannelTyping >> ", err)
