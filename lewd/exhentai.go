@@ -2,12 +2,14 @@ package lewd
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/bwmarrin/discordgo"
-	"github.com/parnurzeal/gorequest"
 	"html"
 	"strconv"
 	"strings"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/bwmarrin/discordgo"
+	"github.com/parnurzeal/gorequest"
 )
 
 const (
@@ -51,13 +53,10 @@ func makeRequest(method string, list [][]string) []galleryMetadata {
 	var response ehentaiResponse
 
 	// Post the request
-	resp, reply, errs := gorequest.New().Post(apiURL).SendStruct(jsonStruct).EndStruct(&response)
+	_, reply, errs := gorequest.New().Post(apiURL).SendStruct(jsonStruct).Timeout(10 * time.Second).EndStruct(&response)
 	for _, err := range errs {
-		log.Debugf("%+v", jsonStruct)
-
 		log.WithFields(log.Fields{
-			"status": resp.Status,
-			"reply":  reply,
+			"reply": string(reply),
 		}).Error("API Request failed", err)
 
 		return []galleryMetadata{}

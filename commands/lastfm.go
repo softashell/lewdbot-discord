@@ -111,7 +111,7 @@ func getNowPlaying(username string) (string, error) {
 	_, reply, errs := gorequest.New().Get(url).Timeout(5 * time.Second).EndStruct(&response)
 	for _, err := range errs {
 		log.WithFields(log.Fields{
-			"reply": reply,
+			"reply": string(reply),
 		}).Error("API Request failed", err)
 
 		return "", fmt.Errorf("You fucking broke it")
