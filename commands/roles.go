@@ -205,7 +205,7 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 	if exists {
 		for _, _role := range member.Roles {
 			if _role == role.ID {
-				return fmt.Sprintf("You're already subscribed to %s~", arg)
+				return fmt.Sprintf("You're already subscribed to %s~", role.Name)
 			}
 		}
 	}
@@ -217,10 +217,10 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 	}
 
 	if exists {
-		return fmt.Sprintf("You're now subscribed to %s~", arg)
+		return fmt.Sprintf("You're now subscribed to %s~", role.Name)
 	}
 
-	return fmt.Sprintf("Created and subscribed to %s", arg)
+	return fmt.Sprintf("Created and subscribed to %s", role.Name)
 }
 
 func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string) string {
@@ -252,7 +252,7 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 		}
 	}
 	if pos < 0 {
-		return fmt.Sprintf("You're already not subscribed to %s~", arg)
+		return fmt.Sprintf("You're already not subscribed to %s~", role.Name)
 	}
 
 	err = s.GuildMemberRoleRemove(GuildID, UserID, role.ID)
@@ -278,16 +278,18 @@ func removeRole(s *discordgo.Session, GuildID string, UserID string, arg string)
 	fmt.Println("Should delete it?", delete)
 
 	if delete {
+		roleName := role.Name
+
 		err := s.GuildRoleDelete(GuildID, role.ID)
 		if err != nil {
 			fmt.Println(err)
-			return fmt.Sprintf("Unsubscribed from but failed to delete %s~", arg)
+			return fmt.Sprintf("Unsubscribed from but failed to delete %s~", roleName)
 		}
 
 		fmt.Println("Unsubscribed and deleted")
-		return fmt.Sprintf("Unsubscribed from and deleted %s~", arg)
+		return fmt.Sprintf("Unsubscribed from and deleted %s~", roleName)
 	}
 
 	fmt.Println("Unsubscribed")
-	return fmt.Sprintf("Unsubscribed from %s~", arg)
+	return fmt.Sprintf("Unsubscribed from %s~", role.Name)
 }
