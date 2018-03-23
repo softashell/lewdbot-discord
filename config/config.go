@@ -1,28 +1,30 @@
 package config
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
 )
 
 type Config struct {
-	loginCredentials `json:"login"`
+	LoginCredentials `json:"login"`
 	Brain            []brainFile              `json:"brain"`
 	Blacklist        []string                 `json:"blacklist"`
 	Guilds           map[string]guildSettings `json:"guilds"`
 	Masters          []string                 `json:"masters"`
-	lastfm           `json:"lastfm"`
+	Lastfm           `json:"lastfm"`
 }
 
-type loginCredentials struct {
+type LoginCredentials struct {
 	Token string `json:"token"`
 }
 
-type lastfm struct {
+type Lastfm struct {
 	lock      sync.RWMutex
 	Key       string            `json:"api_key"`
 	Usernames map[string]string `json:"usernames"`
@@ -41,12 +43,11 @@ type guildSettings struct {
 }
 
 type channelSettings struct {
-	Lewd   bool `json:"lewd"`
-	Spam   bool `json:"spam"`
-	Pso2eq bool `json:"pso2"`
+	Lewd bool `json:"lewd"`
+	Spam bool `json:"spam"`
 }
 
-var c Config
+var c *Config
 
 func Init() {
 	c = loadConfigFromFile("./data/config.json")
@@ -61,9 +62,9 @@ func Init() {
 		}
 	}
 
-	c.lastfm.lock = sync.RWMutex{}
-	if c.lastfm.Usernames == nil {
-		c.lastfm.Usernames = make(map[string]string)
+	c.Lastfm.lock = sync.RWMutex{}
+	if c.Lastfm.Usernames == nil {
+		c.Lastfm.Usernames = make(map[string]string)
 	}
 
 	if len(c.Token) == 0 {
@@ -74,11 +75,11 @@ func Init() {
 }
 
 func Get() *Config {
-	return &c
+	return c
 }
 
 func Save() {
-	_json, err := json.MarshalIndent(c, "", "  ")
+	_json, err := json.MarshalIndent(&c, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,9 +90,9 @@ func Save() {
 	}
 }
 
-func Print(c Config) {
+func Print(c *Config) {
 	// Print out current config
-	_json, err := json.MarshalIndent(c, "", "\t")
+	_json, err := json.MarshalIndent(&c, "", "\t")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,16 +100,16 @@ func Print(c Config) {
 	log.Println(string(_json))
 }
 
-func loadConfigFromFile(filename string) Config {
-	fileDump, err := ioutil.ReadFile(filename)
+func loadConfigFromFile(filename string) *Config {
+	f, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
-	var config = Config{}
+	var config = &Config{}
 
-	if err := json.Unmarshal(fileDump, &config); err != nil {
-		log.Fatal(err)
+	if err := json.NewDecoder(bufio.NewReader(f)).Decode(&config); err != nil {
+		log.Fatal(err.Error())
 	}
 
 	return config
@@ -219,21 +220,21 @@ func ShouldManageRoles(guild string) bool {
 }
 
 func SetLastfmUsername(UserID string, username string) {
-	c.lastfm.lock.Lock()
-	defer c.lastfm.lock.Unlock()
+	c.Lastfm.lock.Lock()
+	defer c.Lastfm.lock.Unlock()
 
 	log.Println("Setting username for", UserID, "to", username)
 
-	c.lastfm.Usernames[UserID] = username
+	c.Lastfm.Usernames[UserID] = username
 
 	Save()
 }
 
 func GetLastfmUsername(UserID string) (string, error) {
-	c.lastfm.lock.RLock()
-	defer c.lastfm.lock.RUnlock()
+	c.Lastfm.lock.RLock()
+	defer c.Lastfm.lock.RUnlock()
 
-	username := c.lastfm.Usernames[UserID]
+	username := c.Lastfm.Usernames[UserID]
 	if len(username) < 1 {
 		return "", fmt.Errorf("Couldn't find saved last.fm username")
 	}
@@ -242,5 +243,5 @@ func GetLastfmUsername(UserID string) (string, error) {
 }
 
 func GetLastfmKey() string {
-	return c.lastfm.Key
+	return c.Lastfm.Key
 }
