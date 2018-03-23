@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 func getMentionableRoles(s *discordgo.Session, GuildID string) []*discordgo.Role {
@@ -47,12 +48,14 @@ func getMentionableRoles(s *discordgo.Session, GuildID string) []*discordgo.Role
 }
 
 func roleExists(g *discordgo.Guild, name string) (bool, *discordgo.Role) {
+	name = strings.ToLower(name)
+
 	for _, role := range g.Roles {
 		if role.Name == "@everyone" {
 			continue
 		}
 
-		if role.Name == name {
+		if strings.ToLower(role.Name) == name {
 			return true, role
 		}
 
