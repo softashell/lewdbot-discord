@@ -1,7 +1,7 @@
 image: golang:latest
 
 before_script:
-  - go-wrapper download
+  - go get -d -v
   - git -C "$GOPATH/src/github.com/bwmarrin/discordgo" checkout develop
 
 build:linux64:
