@@ -48,10 +48,7 @@ func registerLastfmProfile(UserID string, arg string) string {
 
 	config.SetLastfmUsername(UserID, arg)
 
-	out := fmt.Sprintf("Changed your last.fm username to %q", arg)
-	out += spamNowPlayingUser(UserID)
-
-	return out
+	return fmt.Sprintf("Changed your last.fm username to %q", arg)
 }
 
 func removeLastfmProfile(UserID string) string {
