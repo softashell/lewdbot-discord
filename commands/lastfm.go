@@ -70,7 +70,7 @@ func spamNowPlayingUser(UserID string) string {
 		return "You haven't registered your last.fm profile yet! Use ``!np set username`` to register~"
 	}
 
-	np, err := getNowPlaying(username)
+	np, err := getNowPlaying(UserID, username)
 	if err != nil {
 		log.Errorf("spamNowPlayingUser >> %v", err)
 
@@ -95,8 +95,9 @@ func spamNowPlayingServer(s *discordgo.Session, GuildID string) string {
 			continue
 		}
 
-		np, err := getNowPlaying(username)
+		np, err := getNowPlaying(m.User.ID, username)
 		if err != nil {
+			log.Warn(err)
 			continue
 		}
 
@@ -110,7 +111,7 @@ func spamNowPlayingServer(s *discordgo.Session, GuildID string) string {
 	return "```" + out + "```"
 }
 
-func getNowPlaying(username string) (string, error) {
+func getNowPlaying(UserID string, username string) (string, error) {
 	params := fmt.Sprintf("method=user.getRecentTracks&user=%s&api_key=%s&limit=1&format=json", username, config.GetLastfmKey())
 	url := apiURL + params
 
@@ -128,6 +129,13 @@ func getNowPlaying(username string) (string, error) {
 
 	if response.Error > 0 {
 		log.Error(response.Error, response.Message)
+
+		// 6 : Invalid parameters - Your request is missing a required parameter
+		if response.Error == 6 && response.Message == "User not found" {
+			log.Errorf("getNowPlaying >> Removing username %q from user %q since last.fm tells us it doesn't exist.", username, UserID)
+			config.RemoveLastfmUsername(UserID)
+		}
+
 		return "", fmt.Errorf("%d %s", response.Error, response.Message)
 	}
 
