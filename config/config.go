@@ -242,6 +242,17 @@ func GetLastfmUsername(UserID string) (string, error) {
 	return username, nil
 }
 
+func RemoveLastfmUsername(UserID string) {
+	c.Lastfm.lock.Lock()
+	defer c.Lastfm.lock.Unlock()
+
+	log.Println("Removed associated username for", UserID)
+
+	delete(c.Lastfm.Usernames, UserID)
+
+	Save()
+}
+
 func GetLastfmKey() string {
 	return c.Lastfm.Key
 }

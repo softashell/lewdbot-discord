@@ -116,6 +116,8 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 			if strings.HasPrefix(command, "!np set") && len(text) > 8 {
 				reply = registerLastfmProfile(m.Author.ID, text[8:])
+			} else if strings.HasPrefix(command, "!np remove") {
+				reply = removeLastfmProfile(m.Author.ID)
 			} else {
 				reply = spamNowPlayingUser(m.Author.ID)
 			}

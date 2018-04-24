@@ -54,6 +54,18 @@ func registerLastfmProfile(UserID string, arg string) string {
 	return out
 }
 
+func removeLastfmProfile(UserID string) string {
+	username, err := config.GetLastfmUsername(UserID)
+	if err != nil {
+		log.Errorf("removeLastfmProfile >> %v", err)
+		return "Who the HELL are you?~"
+	}
+
+	config.RemoveLastfmUsername(UserID)
+
+	return fmt.Sprintf("Removed your saved last.fm username (%s)~", username)
+}
+
 func spamNowPlayingUser(UserID string) string {
 	username, err := config.GetLastfmUsername(UserID)
 	if err != nil {
