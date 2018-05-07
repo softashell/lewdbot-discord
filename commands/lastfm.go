@@ -105,7 +105,7 @@ func spamNowPlayingServer(s *discordgo.Session, GuildID string) string {
 	}
 
 	if len(out) < 1 {
-		out = "Nobody has registered their last.fm profile yet"
+		return "Nothing to see here~"
 	}
 
 	return "```" + out + "```"
