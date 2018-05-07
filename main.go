@@ -10,12 +10,15 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 	"github.com/softashell/lewdbot-discord/brain"
 	"github.com/softashell/lewdbot-discord/commands"
 	"github.com/softashell/lewdbot-discord/config"
 	"github.com/softashell/lewdbot-discord/lewd"
 	"github.com/softashell/lewdbot-discord/regex"
 )
+
+const maxConnectionFailures = 5
 
 func main() {
 	err := os.Mkdir("./data", 0700)
@@ -32,7 +35,25 @@ func main() {
 
 	go fillBrain()
 
-	connectToDiscord()
+	failures := 0
+
+	go func() {
+		for failures < maxConnectionFailures {
+			if err := connectToDiscord(); err != nil {
+				log.Error(err)
+				time.Sleep(25 * time.Second)
+
+				failures++
+			} else {
+				break
+			}
+		}
+
+		if failures >= maxConnectionFailures-1 {
+			log.Error("maximum failures reached while starting up")
+			interrupt <- os.Interrupt
+		}
+	}()
 
 	<-interrupt
 
@@ -74,7 +95,7 @@ func fillBrain() {
 	log.Println("Brain filled in", time.Since(start))
 }
 
-func connectToDiscord() {
+func connectToDiscord() error {
 	log.Println("Connecting to discord")
 
 	var err error
@@ -83,8 +104,7 @@ func connectToDiscord() {
 
 	dg, err := discordgo.New("Bot " + c.Token)
 	if err != nil {
-		log.Error(err)
-		return
+		return errors.Wrap(err, "failed to create discordgo")
 	}
 
 	// Register messageCreate as a callback for the OnMessageCreate event.
@@ -96,18 +116,18 @@ func connectToDiscord() {
 	// Verify the Token is valid and grab user information
 	dg.State.User, err = dg.User("@me")
 	if err != nil {
-		log.Errorf("error fetching user information, %s\n", err)
-		return
+		return errors.Wrapf(err, "error fetching user information")
 	}
 
 	// Open websocket connection
 	err = dg.Open()
 	if err != nil {
-		log.Errorf("error opening connection to Discord, %s\n", err)
-		return
+		return errors.Wrap(err, "error opening connection to Discord")
 	}
 
 	log.Println("Connected")
+
+	return nil
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
