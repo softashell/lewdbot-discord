@@ -118,7 +118,7 @@ func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
 		return
 	}
 
-	if m.Presence.Game.Type == discordgo.GameTypeStreaming && roleAdded {
+	if m.Presence.Game.Type == discordgo.GameTypeStreaming && !roleAdded {
 		log.Info("presenceUpdate :: adding group")
 		err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
 		if err != nil {
