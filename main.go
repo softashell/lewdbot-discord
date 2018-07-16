@@ -102,7 +102,7 @@ func connectToDiscord() error {
 		return errors.Wrap(err, "failed to create discordgo")
 	}
 
-	// Register messageCreate as a callback for the OnMessageCreate event.
+	dg.AddHandler(ready)
 	dg.AddHandler(messageCreate)
 	dg.AddHandler(presenceUpdate)
 

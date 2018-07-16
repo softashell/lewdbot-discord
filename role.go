@@ -4,8 +4,67 @@ import (
 	"fmt"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+	"github.com/softashell/lewdbot-discord/config"
 )
+
+func fixStreamerRoles(s *discordgo.Session) {
+	for _, g := range s.State.Guilds {
+		if !config.GuildHasStreamerRoleEnabled(g.ID) {
+			continue
+		}
+
+		// Fetch data manually
+		g, err := s.Guild(g.ID)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		role, err := getRole(g, "Streamer")
+		if err != nil {
+			log.Error(err, " ", g.ID, " ", g.Name)
+			continue
+		}
+
+		for _, m := range g.Members {
+			p, err := s.State.Presence(g.ID, m.User.ID)
+			if err != nil {
+				log.Errorf("failed to get presence for member %s in guid %s - %s", m.User.ID, g.ID, err)
+				continue
+			}
+
+			updateStreamerRole(s, p, g.ID, m.User.ID, role.ID)
+		}
+	}
+}
+
+func updateStreamerRole(s *discordgo.Session, p *discordgo.Presence, guildID, userID, roleID string) error {
+	roleAdded, err := hasRole(s, guildID, userID, roleID)
+	if err != nil {
+		log.Errorf("updateStreamerRole: failed to get member roles - %s", err)
+		return err
+	}
+
+	if p.Game == nil && roleAdded {
+		log.Infof("updateStreamerRole: removing  streamer group from %s", userID)
+		err = s.GuildMemberRoleRemove(guildID, userID, roleID)
+		if err != nil {
+			log.Errorf("updateStreamerRole: failed to remove streamer role - %s", err)
+			return err
+		}
+	} else if p.Game != nil && p.Game.Type == discordgo.GameTypeStreaming && !roleAdded {
+		log.Infof("updateStreamerRole: adding streamer group from %s", userID)
+		err = s.GuildMemberRoleAdd(guildID, userID, roleID)
+		if err != nil {
+			log.Errorf("updateStreamerRole: failed to add streamer role - %s", err)
+			return err
+		}
+	}
+
+	return nil
+}
 
 func getRole(g *discordgo.Guild, name string) (*discordgo.Role, error) {
 	name = strings.ToLower(name)
