@@ -108,8 +108,21 @@ func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
 	updateStreamerRole(s, &m.Presence, guild.ID, m.User.ID, role.ID)
 }
 
-func ready(s *discordgo.Session, m *discordgo.Ready) {
+func guildMembersChunk(s *discordgo.Session, g *discordgo.GuildMembersChunk) {
+	log.Infof("GuildMembersChunk: Adding %d members to %s", len(g.Members), g.GuildID)
+}
+
+func ready(s *discordgo.Session, r *discordgo.Ready) {
 	log.Info("websocket READY")
+
+	for _, g := range r.Guilds {
+		log.Info("requesting members ", g.ID)
+		err := s.RequestGuildMembers(g.ID, "", 0)
+		if err != nil {
+			log.Errorf("failed to get members")
+			continue
+		}
+	}
 
 	time.Sleep(30 * time.Second)
 	log.Info("fixing roles")
