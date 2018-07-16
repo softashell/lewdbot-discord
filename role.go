@@ -24,7 +24,7 @@ func getRole(g *discordgo.Guild, name string) (*discordgo.Role, error) {
 }
 
 func hasRole(s *discordgo.Session, guildID, userID, roleID string) (bool, error) {
-	member, err := s.GuildMember(guildID, userID)
+	member, err := s.State.Member(guildID, userID)
 	if err != nil {
 		return false, err
 	}
