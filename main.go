@@ -104,6 +104,7 @@ func connectToDiscord() error {
 
 	// Register messageCreate as a callback for the OnMessageCreate event.
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(presenceUpdate)
 
 	// Retry after broken websocket
 	dg.ShouldReconnectOnError = true

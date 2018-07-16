@@ -36,10 +36,11 @@ type brainFile struct {
 }
 
 type guildSettings struct {
-	Channels    map[string]channelSettings `json:"channels"`
-	Dumb        bool                       `json:"dumb"`
-	ManageRoles bool                       `json:"roles"`
-	Lastfm      bool                       `json:"lastfm"`
+	Channels     map[string]channelSettings `json:"channels"`
+	Dumb         bool                       `json:"dumb"`
+	ManageRoles  bool                       `json:"roles"`
+	Lastfm       bool                       `json:"lastfm"`
+	StreamerRole bool                       `json:"streamerRole"`
 }
 
 type channelSettings struct {
@@ -201,6 +202,22 @@ func ChannelSetSpam(guild string, channel string) bool {
 
 func ChannelShouldSpam(guild string, channel string) bool {
 	return c.Guilds[guild].Channels[channel].Spam
+}
+
+func GuildSetStreamerRole(guild string) bool {
+	g := c.Guilds[guild]
+
+	g.StreamerRole = !g.StreamerRole
+
+	c.Guilds[guild] = g
+
+	Save()
+
+	return g.StreamerRole
+}
+
+func GuildHasStreamerRoleEnabled(guild string) bool {
+	return c.Guilds[guild].StreamerRole
 }
 
 func SetManageRoles(guild string) bool {

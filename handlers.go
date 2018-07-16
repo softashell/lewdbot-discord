@@ -87,3 +87,45 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		brain.Learn(text, true)
 	}
 }
+
+func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
+	if !config.GuildHasStreamerRoleEnabled(m.GuildID) {
+		return
+	}
+
+	guild, err := s.State.Guild(m.GuildID)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	role, err := getRole(guild, "Streamer")
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if m.Presence.Game == nil {
+		return
+	}
+
+	roleAdded, err := hasRole(s, m.GuildID, m.User.ID, role.ID)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if m.Presence.Game.Type == discordgo.GameTypeStreaming && roleAdded {
+		err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	} else if roleAdded {
+		err = s.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	}
+}

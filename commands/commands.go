@@ -77,6 +77,14 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			}
 
 			return true, reply
+		} else if strings.HasPrefix(command, "streamer") {
+			if config.GuildSetStreamerRole(channel.GuildID) {
+				reply = msgOn
+			} else {
+				reply = msgOff
+			}
+
+			return true, reply
 		}
 
 		return false, ""
