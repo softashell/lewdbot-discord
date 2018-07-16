@@ -89,11 +89,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
-	log.Infof("presenceUpdate :: Guild: %s User: %s (%s) Game: %v", m.GuildID, m.User.ID, m.User.Username, m.Game)
-
 	if !config.GuildHasStreamerRoleEnabled(m.GuildID) || m.Presence.Game == nil {
 		return
 	}
+
+	log.Infof("presenceUpdate :: Guild: %s User: %s (%s || %s) Game: %#v", m.GuildID, m.User.ID, m.Nick, m.User.Username, m.Game)
 
 	guild, err := s.State.Guild(m.GuildID)
 	if err != nil {
