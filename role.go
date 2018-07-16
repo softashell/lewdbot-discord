@@ -28,14 +28,8 @@ func fixStreamerRoles(s *discordgo.Session) {
 			continue
 		}
 
-		for _, m := range g.Members {
-			p, err := s.State.Presence(g.ID, m.User.ID)
-			if err != nil {
-				log.Errorf("failed to get presence for member %s in guid %s - %s", m.User.ID, g.ID, err)
-				continue
-			}
-
-			updateStreamerRole(s, p, g.ID, m.User.ID, role.ID)
+		for _, p := range g.Presences {
+			updateStreamerRole(s, p, g.ID, p.User.ID, role.ID)
 		}
 	}
 }
