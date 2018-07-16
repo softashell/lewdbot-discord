@@ -89,6 +89,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
+	log.Info("presenceUpdate :: Guild: %s User: %s (%s) Game: %v", m.GuildID, m.User.ID, m.User.Username, m.Game)
+
 	if !config.GuildHasStreamerRoleEnabled(m.GuildID) {
 		return
 	}
@@ -106,6 +108,7 @@ func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
 	}
 
 	if m.Presence.Game == nil {
+		log.Warn("presenceUpdate :: no game struct")
 		return
 	}
 
@@ -116,12 +119,14 @@ func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
 	}
 
 	if m.Presence.Game.Type == discordgo.GameTypeStreaming && roleAdded {
+		log.Info("presenceUpdate :: adding group")
 		err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 	} else if roleAdded {
+		log.Info("presenceUpdate :: removing group")
 		err = s.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID)
 		if err != nil {
 			log.Error(err)
