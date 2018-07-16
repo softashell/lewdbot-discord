@@ -89,11 +89,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
-	if !config.GuildHasStreamerRoleEnabled(m.GuildID) || m.Presence.Game == nil {
+	if !config.GuildHasStreamerRoleEnabled(m.GuildID) {
 		return
 	}
-
-	log.Infof("presenceUpdate :: Guild: %s User: %s (%s || %s) Game: %#v", m.GuildID, m.User.ID, m.Nick, m.User.Username, m.Game)
 
 	guild, err := s.State.Guild(m.GuildID)
 	if err != nil {
@@ -113,18 +111,18 @@ func presenceUpdate(s *discordgo.Session, m *discordgo.PresenceUpdate) {
 		return
 	}
 
-	if m.Presence.Game.Type == discordgo.GameTypeStreaming && !roleAdded {
-		log.Info("presenceUpdate :: adding streamer group")
-		err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
-		if err != nil {
-			log.Errorf("presenceUpdate :: failed to add streamer role - %s", err)
-			return
-		}
-	} else if roleAdded {
-		log.Info("presenceUpdate :: removing  streamer group")
+	if m.Presence.Game == nil && roleAdded {
+		log.Info("presenceUpdate :: removing  streamer group from %s (%s || %s)", m.User.ID, m.User.Username, m.Nick)
 		err = s.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID)
 		if err != nil {
 			log.Errorf("presenceUpdate :: failed to remove streamer role - %s", err)
+			return
+		}
+	} else if m.Presence.Game != nil && m.Presence.Game.Type == discordgo.GameTypeStreaming && !roleAdded {
+		log.Info("presenceUpdate :: adding streamer group from %s (%s || %s)", m.User.ID, m.User.Username, m.Nick)
+		err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
+		if err != nil {
+			log.Errorf("presenceUpdate :: failed to add streamer role - %s", err)
 			return
 		}
 	}
