@@ -2,3 +2,4 @@ data/
 /config.json
 /lewdbot-discord
 /vendor
+Gopkg.lock
