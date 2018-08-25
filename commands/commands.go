@@ -151,6 +151,14 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 		reply = dice(text[5:], m.Author)
 
 		return true, reply
+	} else if strings.HasPrefix(command, "!pin") {
+		if perms, err := s.State.UserChannelPermissions(m.Author.ID, m.ChannelID); err != nil {
+			if (perms & discordgo.PermissionManageWebhooks) > 1 {
+				return true, pinMessage(s, m)
+			}
+			return false, ""
+		}
+		return true, "Sorry, something went wrong~"
 	}
 
 	return false, reply
