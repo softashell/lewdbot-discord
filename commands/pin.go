@@ -10,7 +10,7 @@ func pinMessage(s *discordgo.Session, m *discordgo.MessageCreate) string {
 
 	for _, message := range messages {
 		if message.Author.ID == m.Author.ID && message.ID != m.ID {
-			err := s.ChannelMessagePin(m.ChannelID, m.ID)
+			err := s.ChannelMessagePin(m.ChannelID, message.ID)
 			if err != nil {
 				return "Sorry, I am unable to pin the message~"
 			}
