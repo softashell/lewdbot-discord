@@ -152,11 +152,11 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 
 		return true, reply
 	} else if strings.HasPrefix(command, "!pin") {
-		if perms, err := s.State.UserChannelPermissions(m.Author.ID, m.ChannelID); err != nil {
-			if (perms & discordgo.PermissionManageWebhooks) > 1 {
+		if perms, err := s.State.UserChannelPermissions(m.Author.ID, m.ChannelID); err == nil {
+			if (perms&discordgo.PermissionAdministrator | discordgo.PermissionManageWebhooks) != 0 {
 				return true, pinMessage(s, m)
 			}
-			return false, ""
+			return true, "You don't have permission to do that~"
 		}
 		return true, "Sorry, something went wrong~"
 	}
