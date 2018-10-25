@@ -159,6 +159,8 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			return true, "You don't have permission to do that~"
 		}
 		return true, "Sorry, something went wrong~"
+	} else if strings.HasPrefix(command, "!digits") {
+		return true, m.ID
 	}
 
 	return false, reply
