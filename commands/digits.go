@@ -16,7 +16,7 @@ func digits(s *discordgo.Session, m *discordgo.MessageCreate) string {
 
 	for _, message := range messages {
 		if message.Author.ID == m.Mentions[0].ID && message.ID != m.ID {
-			return message.ID
+			return "He got " + message.ID
 		}
 	}
 	return "He needs to speak up first~"
