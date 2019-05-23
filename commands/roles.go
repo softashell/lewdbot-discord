@@ -210,6 +210,10 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 		}
 	}
 
+	if !role.Mentionable {
+		return "Not gonna add you to that one, my dude~"
+	}
+	
 	err = s.GuildMemberRoleAdd(GuildID, UserID, role.ID)
 	if err != nil {
 		fmt.Println(err)
