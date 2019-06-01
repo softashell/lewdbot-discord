@@ -10,8 +10,7 @@ before_script:
   - mkdir -p ${CI_PROJECT_DIR}/${ARTIFACTS_DIR}
   - cp -r ${CI_PROJECT_DIR}/* ${GOPATH}/src/${GO_PROJECT}/
   - cd ${GOPATH}/src/${GO_PROJECT}
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep ensure
+  - go get -d -v
 
 build:linux64:
   stage: build
