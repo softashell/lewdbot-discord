@@ -12,7 +12,7 @@ import (
 
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 const apiURL = "http://ws.audioscrobbler.com/2.0/?"

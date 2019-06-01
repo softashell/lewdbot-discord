@@ -3,7 +3,7 @@ package brain
 import (
 	"bufio"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/pteichman/fate"
 	"github.com/softashell/lewdbot-discord/regex"
 	"github.com/tebeka/snowball"
