@@ -1,7 +1,6 @@
 package lewd
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/softashell/lewdbot-discord/regex"
 )
@@ -50,11 +49,8 @@ func ParseLinks(s *discordgo.Session, channel string, text string) bool {
 		galleryMetadata := getGalleryMetadata(exGalleries)
 		parseGalleryMetadata(s, channel, galleryMetadata)
 	} else if len(nhGalleries) > 0 {
-		reply := "```css\n>nhentai\n```"
-		_, err := s.ChannelMessageSend(channel, reply)
-		if err != nil {
-			log.Warn("s.ChannelMessageSend", err)
-		}
+		// TODO: Parse tags
+		return false
 	} else {
 		// Didn't find anything
 		return false
