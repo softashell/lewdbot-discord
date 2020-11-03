@@ -15,7 +15,7 @@ import (
 )
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID || len(m.Message.Content) < 1 {
+	if m.Author.ID == s.State.User.ID || m.Author.Bot || len(m.Message.Content) < 1 {
 		return
 	}
 
