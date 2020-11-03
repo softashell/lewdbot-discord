@@ -117,7 +117,7 @@ func ready(s *discordgo.Session, r *discordgo.Ready) {
 
 	for _, g := range r.Guilds {
 		log.Info("requesting members ", g.ID)
-		err := s.RequestGuildMembers(g.ID, "", 0)
+		err := s.RequestGuildMembers(g.ID, "", 0, true)
 		if err != nil {
 			log.Errorf("failed to get members")
 			continue

@@ -107,6 +107,8 @@ func connectToDiscord() error {
 	dg.AddHandler(presenceUpdate)
 	dg.AddHandler(guildMembersChunk)
 
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+
 	// Retry after broken websocket
 	dg.ShouldReconnectOnError = true
 
