@@ -3,7 +3,7 @@ module github.com/softashell/lewdbot-discord
 go 1.12
 
 require (
-	github.com/bwmarrin/discordgo v0.22.0
+	github.com/bwmarrin/discordgo v0.23.1
 	github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2 // indirect
 	github.com/elazarl/goproxy/ext v0.0.0-20190711103511-473e67f1d7d2 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
@@ -16,9 +16,9 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/tebeka/snowball v0.4.2
-	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
-	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
-	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1 // indirect
-	golang.org/x/text v0.3.4
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	golang.org/x/text v0.3.5
 	moul.io/http2curl v1.0.0 // indirect
 )

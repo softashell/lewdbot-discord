@@ -43,10 +43,24 @@ func updateStreamerRole(s *discordgo.Session, p *discordgo.Presence, guildID, us
 		return err
 	}
 
-	isStreaming := p != nil && p.Game != nil && p.Game.Type == discordgo.GameTypeStreaming
+	if(p == nil) {
+		return nil;
+	}
+
+	isStreaming := false
+
+	for _, a := range p.Activities {
+		if(a.Type != discordgo.ActivityTypeStreaming) {
+			continue
+		}
+
+		log.Infof("updateStreamerRole: %s streaming %s", userID, a.Name)
+		isStreaming = true
+		break
+	}
 
 	if isStreaming && !roleAdded {
-		log.Infof("updateStreamerRole: adding streamer group from %s", userID)
+		log.Infof("updateStreamerRole: adding streamer group to %s", userID)
 		err = s.GuildMemberRoleAdd(guildID, userID, roleID)
 		if err != nil {
 			log.Errorf("updateStreamerRole: failed to add streamer role - %s", err)
