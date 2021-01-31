@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 	"github.com/softashell/lewdbot-discord/brain"
 	"github.com/softashell/lewdbot-discord/commands"
 	"github.com/softashell/lewdbot-discord/config"
@@ -22,6 +22,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	channel, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		log.Warn("s.State.Channel >> ", err)
+		channel, err = s.Channel(m.ChannelID)
+		if err != nil {
+			log.Warn("s.Channel >> ", err)
+			return
+		}
 	}
 
 	if channel.Type == discordgo.ChannelTypeDM {
