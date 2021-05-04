@@ -82,9 +82,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Log our reply
 		fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), s.State.User.Username, reply)
 
-		_, err = s.ChannelMessageSendReply(m.ChannelID, reply, m.Reference())
-		if err != nil {
-			log.Warn("s.ChannelMessageSendReply >> ", err)
+		if(channel.LastMessageID != m.ID) {
+			_, err = s.ChannelMessageSendReply(m.ChannelID, reply, m.Reference())
+			if err != nil {
+				log.Warn("s.ChannelMessageSendReply >> ", err)
+			}
+		} else {
+			_, err = s.ChannelMessageSend(m.ChannelID, reply)
+			if err != nil {
+				log.Warn("s.ChannelMessageSend >> ", err)
+			}
 		}
 
 	} else if !config.GuildIsDumb(channel.GuildID) {
