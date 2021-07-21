@@ -64,6 +64,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	if config.ChannelIsMangadex(channel.GuildID, m.ChannelID) {
+		if mangadexClient.ParseLinks(s, m, m.ChannelID, text) {
+			return
+		}
+	}
+
 	// Accept the legacy mention as well and trim it off from text
 	if strings.HasPrefix(strings.ToLower(text), "lewdbot, ") {
 		text = text[9:]

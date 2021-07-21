@@ -46,6 +46,7 @@ type guildSettings struct {
 type channelSettings struct {
 	Lewd bool `json:"lewd"`
 	Spam bool `json:"spam"`
+	Mangadex bool `json:"mangadex"`
 }
 
 var c *Config
@@ -175,6 +176,29 @@ func ChannelSetLewd(guild string, channel string) bool {
 	Save()
 
 	return ch.Lewd
+}
+
+func ChannelIsMangadex(guild string, channel string) bool {
+	return c.Guilds[guild].Channels[channel].Mangadex
+}
+
+func ChannelSetMangadex(guild string, channel string) bool {
+	g := c.Guilds[guild]
+
+	if g.Channels == nil {
+		g.Channels = make(map[string]channelSettings)
+	}
+
+	ch := g.Channels[channel]
+
+	ch.Mangadex = !ch.Mangadex
+
+	g.Channels[channel] = ch
+	c.Guilds[guild] = g
+
+	Save()
+
+	return ch.Mangadex
 }
 
 func ChannelIsLewd(guild string, channel string) bool {

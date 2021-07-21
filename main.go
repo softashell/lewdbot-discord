@@ -6,14 +6,17 @@ import (
 	"path/filepath"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/softashell/lewdbot-discord/brain"
 	"github.com/softashell/lewdbot-discord/config"
+	"github.com/softashell/lewdbot-discord/mangadex"
 )
 
 const maxConnectionFailures = 5
+
+var mangadexClient *mangadex.Mangadex
 
 func main() {
 	err := os.Mkdir("./data", 0700)
@@ -27,6 +30,7 @@ func main() {
 
 	config.Init()
 	brain.Init()
+	mangadexClient = mangadex.NewMangadex()
 
 	go fillBrain()
 

@@ -3,8 +3,8 @@ package commands
 import (
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 	"github.com/softashell/lewdbot-discord/config"
 )
 
@@ -79,6 +79,14 @@ func ParseMessage(s *discordgo.Session, m *discordgo.MessageCreate, text string)
 			return true, reply
 		} else if strings.HasPrefix(command, "streamer") {
 			if config.GuildSetStreamerRole(channel.GuildID) {
+				reply = msgOn
+			} else {
+				reply = msgOff
+			}
+
+			return true, reply
+		} else if strings.HasPrefix(command, "mangadex") {
+			if config.ChannelSetMangadex(channel.GuildID, channel.ID) {
 				reply = msgOn
 			} else {
 				reply = msgOff

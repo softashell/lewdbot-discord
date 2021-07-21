@@ -40,4 +40,7 @@ var (
 	ExGalleryPage = regexp.MustCompile(`https?:\/\/exhentai\.org\/s\/([[:alnum:]]+)/([[:digit:]]+)-([[:digit:]]+)`)
 	// NhGalleryLink Matches exhentai gallery linkss
 	NhGalleryLink = regexp.MustCompile(`https?:\/\/nhentai\.net\/g\/([[:digit:]]+)`)
+
+	MangadexTitleUrl = regexp.MustCompile(`https:\/\/mangadex\.org\/title\/([[:alnum:]-]+)/?`)
+	MangadexChapterUrl = regexp.MustCompile(`https:\/\/mangadex\.org\/chapter\/([[:alnum:]-]+)/?`)
 )
