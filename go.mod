@@ -2,6 +2,8 @@ module github.com/softashell/lewdbot-discord
 
 go 1.16
 
+replace github.com/bwmarrin/discordgo => github.com/nixxquality/discordgo v0.23.3-0.20210722071635-666fa5940557
+
 require (
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/elazarl/goproxy v0.0.0-20210110162100-a92cc753f88e // indirect

@@ -242,7 +242,17 @@ func (md *Mangadex) ParseLinks(s *discordgo.Session, m *discordgo.MessageCreate,
 			continue
 		}
 
-		mangaList = append(mangaList, manga)
+		var dupe bool
+		for _, v := range mangaList {
+			if v.Data.ID == manga.Data.ID {
+				dupe = true
+				break
+			}
+		}
+		if(!dupe) {
+			mangaList = append(mangaList, manga)
+		}
+
 		chapterList = append(chapterList, chapter)
 	}
 
@@ -309,6 +319,20 @@ func (md *Mangadex) writeMangaData(s *discordgo.Session, m *discordgo.MessageCre
 		_, err := s.ChannelMessageSendEmbed(m.ChannelID, &message)
 		if err != nil {
 			log.Warn("s.ChannelMessageSendEmbed >>", err)
+			return
+		}
+
+		original, err := s.ChannelMessage(m.ChannelID, m.ID)
+		if err != nil {
+			log.Warn("s.ChannelMessage >>", err)
+			return
+		}
+		edit := discordgo.NewMessageEdit(m.ChannelID, m.ID)
+		edit.Flags = original.Flags | discordgo.MessageFlagsSuppressEmbeds
+		_, err = s.ChannelMessageEditComplex(edit)
+		if err != nil {
+			log.Warn("s.ChannelMessageEditComplex >>", err)
+			return
 		}
 	}
 }

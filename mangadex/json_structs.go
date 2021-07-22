@@ -106,10 +106,6 @@ type Cover struct {
 type Author struct {
 	Data struct {
 		Attributes struct {
-			Biography struct {
-				Property1 string `json:"property1"`
-				Property2 string `json:"property2"`
-			} `json:"biography"`
 			CreatedAt string `json:"createdAt"`
 			ImageURL  string `json:"imageUrl"`
 			Name      string `json:"name"`
