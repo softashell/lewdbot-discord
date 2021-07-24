@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/parnurzeal/gorequest"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -126,6 +126,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 			keys = append(keys, group)
 		}
 
+		var description string
 		var fields []*discordgo.MessageEmbedField
 
 		for _, group := range keys {
@@ -136,6 +137,10 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 				} else {
 					text += fmt.Sprintf("%s", tag)
 				}
+
+				if((group == "male" && tag == "yaoi") || (group == "female" && tag == "futanari")) {
+					description = ":warning: :exclamation: ALERTA DE HOMO :exclamation: :warning:"
+				}
 			}
 
 			fields = append(fields, &discordgo.MessageEmbedField{Name: group, Value: text, Inline: true})
@@ -144,6 +149,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 		message := discordgo.MessageEmbed{
 			URL:       fmt.Sprintf("https://exhentai.org/g/%d/%s/", gallery.Gid, gallery.Token),
 			Title:     html.UnescapeString(gallery.Title),
+			Description: description,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: gallery.Thumb},
 			Fields:    fields,
 		}
