@@ -139,7 +139,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 				}
 
 				if((group == "male" && tag == "yaoi") || (group == "female" && tag == "futanari")) {
-					description = ":warning: :exclamation: ALERTA DE HOMO :exclamation: :warning:"
+					description = ":exclamation: :warning: :exclamation: GLOBOHOMO SHIT :exclamation: :warning: :exclamation:"
 				}
 			}
 
