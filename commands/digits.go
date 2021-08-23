@@ -5,7 +5,7 @@ import (
 )
 
 func digits(s *discordgo.Session, m *discordgo.MessageCreate) string {
-	if len(m.Mentions) == 0 {
+	if len(m.Mentions) == 0 && m.MessageReference == nil {
 		return m.ID
 	}
 
