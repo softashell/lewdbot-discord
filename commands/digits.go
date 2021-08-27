@@ -10,7 +10,7 @@ func digits(s *discordgo.Session, m *discordgo.MessageCreate) string {
 	}
 
 	if m.MessageReference != nil {
-		return m.MessageReference.MessageID
+		return "He got " + m.MessageReference.MessageID
 	}
 
 	messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
