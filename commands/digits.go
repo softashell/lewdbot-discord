@@ -9,6 +9,10 @@ func digits(s *discordgo.Session, m *discordgo.MessageCreate) string {
 		return m.ID
 	}
 
+	if m.MessageReference != nil {
+		return m.MessageReference.MessageID
+	}
+
 	messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
 	if err != nil {
 		return "Sorry, I am unable to read any messages in this channel~"
