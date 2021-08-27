@@ -5,12 +5,8 @@ import (
 )
 
 func digits(s *discordgo.Session, m *discordgo.MessageCreate) string {
-	if len(m.Mentions) == 0 && m.MessageReference == nil {
+	if len(m.Mentions) == 0 || m.MessageReference != nil {
 		return m.ID
-	}
-
-	if m.MessageReference != nil {
-		return "He got " + m.MessageReference.MessageID
 	}
 
 	messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
