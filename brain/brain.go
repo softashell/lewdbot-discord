@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/pteichman/fate"
@@ -19,21 +18,33 @@ import (
 
 var  (
 	lewdbrain *fate.Model
-	textChan chan string
+	textChan chan learningText
+	textLogChan chan string
 )
 
 // Init Sets the global fate model
 func Init() {
 	lewdbrain = fate.NewModel(fate.Config{Stemmer: newStemmer()})
 	
-	textChan = make(chan string)
+	textChan = make(chan learningText)
+	textLogChan = make(chan string, 64)
 
 	go learnInBackground()
+	go backgroundMessageLogger();
 }
 
+func Close() {
+	close(textChan)
+	close(textLogChan)
+}
 type stemmer struct {
 	tran     transform.Transformer
 	snowball *snowball.Stemmer
+}
+
+type learningText struct {
+	text string
+	saveText bool
 }
 
 func newStemmer() stemmer {
@@ -104,7 +115,7 @@ func Learn(text string, rememberText bool) bool {
 	lewdbrain.Learn(text)
 
 	if rememberText {
-		logMessage(text)
+		textLogChan <- text
 	}
 
 	return true
@@ -127,13 +138,13 @@ func LearnFileLines(path string, simple bool) error {
 		line := s.Text()
 		if !simple { //Learn all lines between empty lines
 			if line == "" {
-				textChan <- text
+				textChan <- learningText{text: text, saveText: false}
 				text = ""
 			} else {
 				text += " " + line
 			}
 		} else { // Learn every line
-			textChan <- text
+			textChan <- learningText{text: text, saveText: false}
 		}
 	}
 
@@ -148,25 +159,9 @@ func Reply(message string) string {
 	reply = regex.TrailingPunctuation.ReplaceAllString(reply, "")
 	reply = fmt.Sprintf("%s~", reply)
 
-	Learn(message, true)
+	textChan <- learningText{text: message, saveText: true}
 
 	return reply
-}
-
-func logMessage(message string) {
-	t := time.Now()
-	fileName := fmt.Sprintf("./data/chatlog-%d-%02d.txt", t.Year(), t.Month())
-
-	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	if err != nil {
-		log.Error("Unable to open log", err)
-	}
-
-	defer f.Close()
-
-	if _, err = f.WriteString(fmt.Sprintf("%s\n\n", message)); err != nil {
-		log.Error("Unable to write in log", err)
-	}
 }
 
 func generateEntropy(s string) (e float64) {

@@ -30,6 +30,7 @@ func main() {
 
 	config.Init()
 	brain.Init()
+	defer brain.Close()
 	mangadexClient = mangadex.NewMangadex()
 
 	go fillBrain()
