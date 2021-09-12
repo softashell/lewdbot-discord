@@ -17,11 +17,18 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-var lewdbrain *fate.Model
+var  (
+	lewdbrain *fate.Model
+	textChan chan string
+)
 
 // Init Sets the global fate model
 func Init() {
 	lewdbrain = fate.NewModel(fate.Config{Stemmer: newStemmer()})
+	
+	textChan = make(chan string)
+
+	go learnInBackground()
 }
 
 type stemmer struct {
@@ -120,13 +127,13 @@ func LearnFileLines(path string, simple bool) error {
 		line := s.Text()
 		if !simple { //Learn all lines between empty lines
 			if line == "" {
-				go Learn(text, false)
+				textChan <- text
 				text = ""
 			} else {
 				text += " " + line
 			}
 		} else { // Learn every line
-			go Learn(line, false)
+			textChan <- text
 		}
 	}
 
