@@ -3,17 +3,18 @@ package brain
 import (
 	"bufio"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/pteichman/fate"
-	"github.com/softashell/lewdbot-discord/regex"
-	"github.com/tebeka/snowball"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 	"math"
 	"os"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/pteichman/fate"
+	log "github.com/sirupsen/logrus"
+	"github.com/softashell/lewdbot-discord/regex"
+	"github.com/tebeka/snowball"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var lewdbrain *fate.Model
@@ -81,7 +82,7 @@ func squish(s string, max int) string {
 }
 
 // Learn Attempts to learn and log input text
-func Learn(text string, log bool) bool {
+func Learn(text string, rememberText bool) bool {
 	text = cleanMessage(text)
 
 	if len(text) < 5 ||
@@ -95,7 +96,7 @@ func Learn(text string, log bool) bool {
 
 	lewdbrain.Learn(text)
 
-	if log {
+	if rememberText {
 		logMessage(text)
 	}
 
@@ -119,13 +120,13 @@ func LearnFileLines(path string, simple bool) error {
 		line := s.Text()
 		if !simple { //Learn all lines between empty lines
 			if line == "" {
-				Learn(text, false)
+				go Learn(text, false)
 				text = ""
 			} else {
 				text += " " + line
 			}
 		} else { // Learn every line
-			Learn(line, false)
+			go Learn(line, false)
 		}
 	}
 
