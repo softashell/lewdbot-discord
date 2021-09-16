@@ -127,7 +127,7 @@ func (md *Mangadex)GetMangaCoverArt(uuid string) string {
 
 	m := md.GetManga(uuid)
 
-	for _, rel := range m.Relationships {
+	for _, rel := range m.Data.Relationships {
 		if(rel.Type != "cover_art") {
 			continue
 		}
@@ -147,7 +147,7 @@ func (md *Mangadex)GetMangaAuthor(uuid string) string {
 
 	m := md.GetManga(uuid)
 
-	for _, rel := range m.Relationships {
+	for _, rel := range m.Data.Relationships {
 		if(rel.Type != "author") {
 			continue
 		}
@@ -196,7 +196,7 @@ func (md *Mangadex)GetChapterManga(uuid string) (Manga, error) {
 
 	var mangaUuid string
 
-	for _, rel := range c.Relationships {
+	for _, rel := range c.Data.Relationships {
 		if(rel.Type != "manga") {
 			continue
 		}

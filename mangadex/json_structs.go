@@ -30,12 +30,11 @@ type Manga struct {
 			CreatedAt string `json:"createdAt"`
 			UpdatedAt string `json:"updatedAt"`
 		} `json:"attributes"`
-
+		Relationships []struct {
+			ID   string `json:"id"`
+			Type string `json:"type"`
+		} `json:"relationships"`
 	} `json:"data"`
-	Relationships []struct {
-		ID   string `json:"id"`
-		Type string `json:"type"`
-	} `json:"relationships"`
 	Errors []struct {
 		Detail string `json:"detail"`
 		ID     string `json:"id"`
@@ -59,13 +58,13 @@ type Chapter struct {
 			Version            int       `json:"version"`
 			Volume             string    `json:"volume"`
 		} `json:"attributes"`
+		Relationships []struct {
+			ID   string `json:"id"`
+			Type string `json:"type"`
+		} `json:"relationships"`
 		ID   string `json:"id"`
 		Type string `json:"type"`
 	} `json:"data"`
-	Relationships []struct {
-		ID   string `json:"id"`
-		Type string `json:"type"`
-	} `json:"relationships"`
 	Errors []struct {
 		Detail string `json:"detail"`
 		ID     string `json:"id"`
@@ -85,15 +84,16 @@ type Cover struct {
 			Version     int    `json:"version"`
 			Volume      string `json:"volume"`
 		} `json:"attributes"`
+		Relationships []struct {
+			Attributes struct {
+			} `json:"attributes"`
+			ID   string `json:"id"`
+			Type string `json:"type"`
+		} `json:"relationships"`
 		ID   string `json:"id"`
 		Type string `json:"type"`
 	} `json:"data"`
-	Relationships []struct {
-		Attributes struct {
-		} `json:"attributes"`
-		ID   string `json:"id"`
-		Type string `json:"type"`
-	} `json:"relationships"`
+
 	Errors []struct {
 		Detail string `json:"detail"`
 		ID     string `json:"id"`
@@ -112,14 +112,15 @@ type Author struct {
 			UpdatedAt string `json:"updatedAt"`
 			Version   int    `json:"version"`
 		} `json:"attributes"`
+		Relationships []struct {
+			Attributes struct {
+			} `json:"attributes"`
+			ID   string `json:"id"`
+			Type string `json:"type"`
+		} `json:"relationships"`
 		ID   string `json:"id"`
 		Type string `json:"type"`
 	} `json:"data"`
-	Relationships []struct {
-		Attributes struct {
-		} `json:"attributes"`
-		ID   string `json:"id"`
-		Type string `json:"type"`
-	} `json:"relationships"`
+
 	Result string `json:"result"`
 }
