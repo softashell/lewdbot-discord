@@ -36,10 +36,25 @@ func dice(text string, author *discordgo.User) string {
 
 	roll := 0
 
+	diceResults := make([]int, 0)
+	var details string
+
 	for dice > 0 {
-		roll += rand.Intn(sides) + 1
+		rollResult := rand.Intn(sides) + 1
+		roll += rollResult
+		diceResults = append(diceResults, roll)
+
+		details += fmt.Sprintf("%d", rollResult)
+
 		dice--
+		if dice >= 1 {
+			details += " + "
+		}
 	}
 
-	return fmt.Sprintf("%s, you rolled %d~", author.Username, roll)
+	if len(diceResults) <= 1 {
+		return fmt.Sprintf("%s, you rolled %d~", author.Username, roll)
+	}
+
+	return fmt.Sprintf("%s, you rolled %d (%s)~", author.Username, roll, details)
 }
