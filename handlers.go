@@ -94,7 +94,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			log.Warn("s.Channel >> ", err)
 		}
 
-		if(channel == nil || channel.LastMessageID != m.ID) {
+		if channel == nil || channel.LastMessageID != m.ID {
 			_, err = s.ChannelMessageSendReply(m.ChannelID, reply, m.Reference())
 			if err != nil {
 				log.Warn("s.ChannelMessageSendReply >> ", err)
@@ -141,7 +141,7 @@ func ready(s *discordgo.Session, r *discordgo.Ready) {
 
 	for _, g := range r.Guilds {
 		log.Info("requesting members ", g.ID)
-		err := s.RequestGuildMembers(g.ID, "", 0, true)
+		err := s.RequestGuildMembers(g.ID, "", 0, "benis", true)
 		if err != nil {
 			log.Errorf("failed to get members")
 			continue

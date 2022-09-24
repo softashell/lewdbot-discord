@@ -171,25 +171,24 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 		exists, role = roleExists(g, arg)
 
 		if !exists {
-			newRole, err := s.GuildRoleCreate(GuildID)
+			permissions := int64(37080064)
+			mentionable := true
+
+			roleParams := discordgo.RoleParams{
+				Name:        arg,
+				Permissions: &permissions,
+				Mentionable: &mentionable,
+			}
+
+			newRole, err := s.GuildRoleCreate(GuildID, &roleParams)
 
 			if err != nil {
 				fmt.Println(err)
 				return "Failed to create role"
 			}
 
-			role, err = s.GuildRoleEdit(GuildID, newRole.ID, arg, newRole.Color, newRole.Hoist, 37080064, true)
-			if err != nil {
-				fmt.Println(err)
+			role = newRole
 
-				err = s.GuildRoleDelete(GuildID, newRole.ID)
-
-				if err != nil {
-					fmt.Println(err)
-				}
-
-				return "You fucking broke it~"
-			}
 			fmt.Println(role)
 		} else {
 			return "Why are you trying to recreate that group?"
@@ -213,7 +212,7 @@ func addRole(s *discordgo.Session, GuildID string, UserID string, arg string) st
 	if !role.Mentionable {
 		return "Not gonna add you to that one, my dude~"
 	}
-	
+
 	err = s.GuildMemberRoleAdd(GuildID, UserID, role.ID)
 	if err != nil {
 		fmt.Println(err)
