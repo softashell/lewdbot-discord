@@ -85,16 +85,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		reply := brain.Reply(text)
 
 		user, err := s.State.Member(m.GuildID, m.Author.ID)
+		log.Info(user.Nick)
 		if err != nil {
-			user, err = s.GuildMember(m.GuildID, m.Author.ID, nil)
+			user, err = s.GuildMember(m.GuildID, m.Author.ID, discordgo.WithRestRetries(1))
 			if err != nil {
 				// We fucked up??
 			}
 		}
 
-		username := m.Author.Username
-		if user.Nick != "" {
+		username := m.Author.GlobalName // Display name
+		if user != nil && user.Nick != "" {
 			username = user.Nick
+		}
+
+		if username == "" {
+			username = m.Author.Username
 		}
 
 		reply = regex.Lewdbot.ReplaceAllString(reply, username)
