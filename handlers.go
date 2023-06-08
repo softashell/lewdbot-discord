@@ -83,9 +83,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		reply := brain.Reply(text)
-		user, err := s.GuildMember(m.GuildID, m.Author.ID, nil)
+
+		user, err := s.State.Member(m.GuildID, m.Author.ID)
 		if err != nil {
-			user, err = s.State.Member(m.GuildID, m.Author.ID)
+			user, err = s.GuildMember(m.GuildID, m.Author.ID, nil)
+			if err != nil {
+				// We fucked up??
+			}
 		}
 
 		username := m.Author.Username
