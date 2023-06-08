@@ -83,7 +83,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		reply := brain.Reply(text)
-		reply = regex.Lewdbot.ReplaceAllString(reply, m.Author.Username)
+		user, err := s.GuildMember(m.GuildID, m.Author.ID, nil)
+		if err != nil {
+			user, err = s.State.Member(m.GuildID, m.Author.ID)
+		}
+
+		username := m.Author.Username
+		if user.Nick != "" {
+			username = user.Nick
+		}
+
+		reply = regex.Lewdbot.ReplaceAllString(reply, username)
 
 		// Log our reply
 		fmt.Printf("%20s %20s %20s > %s\n", channel.Name, time.Now().Format(time.Stamp), s.State.User.Username, reply)
