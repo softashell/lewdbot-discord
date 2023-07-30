@@ -29,12 +29,14 @@ type ehentaiResponse struct {
 }
 
 type galleryMetadata struct {
-	Gid   int      `json:"gid"`
-	Token string   `json:"token"`
-	Title string   `json:"title"`
-	Tags  []string `json:"tags"`
-	Thumb string   `json:"thumb"`
-	Error string   `json:"error"`
+	Gid       int      `json:"gid"`
+	Token     string   `json:"token"`
+	Filecount string   `json:"filecount"`
+	Rating    string   `json:"rating"`
+	Title     string   `json:"title"`
+	Tags      []string `json:"tags"`
+	Thumb     string   `json:"thumb"`
+	Error     string   `json:"error"`
 }
 
 func makeRequest(method string, list [][]string) []galleryMetadata {
@@ -138,7 +140,7 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 					text += fmt.Sprintf("%s", tag)
 				}
 
-				if((group == "male" && tag == "yaoi") || (group == "female" && tag == "futanari")) {
+				if (group == "male" && tag == "yaoi") || (group == "female" && tag == "futanari") {
 					description = ":exclamation: :warning: :exclamation: GLOBOHOMO SHIT :exclamation: :warning: :exclamation:"
 				}
 			}
@@ -146,12 +148,18 @@ func parseGalleryMetadata(s *discordgo.Session, channel string, galleries []gall
 			fields = append(fields, &discordgo.MessageEmbedField{Name: group, Value: text, Inline: true})
 		}
 
+		if len(description) > 0 {
+			description += " "
+		}
+
+		description += fmt.Sprintf("Pages: %s Rating %s", gallery.Filecount, gallery.Rating)
+
 		message := discordgo.MessageEmbed{
-			URL:       fmt.Sprintf("https://exhentai.org/g/%d/%s/", gallery.Gid, gallery.Token),
-			Title:     html.UnescapeString(gallery.Title),
+			URL:         fmt.Sprintf("https://exhentai.org/g/%d/%s/", gallery.Gid, gallery.Token),
+			Title:       html.UnescapeString(gallery.Title),
 			Description: description,
-			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: gallery.Thumb},
-			Fields:    fields,
+			Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: gallery.Thumb},
+			Fields:      fields,
 		}
 
 		_, err := s.ChannelMessageSendEmbed(channel, &message)

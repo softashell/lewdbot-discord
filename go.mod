@@ -13,7 +13,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tebeka/snowball v0.7.0
 	github.com/zenthangplus/goccm v1.1.3
-	golang.org/x/text v0.9.0
+	golang.org/x/text v0.11.0
 )
 
 require (
@@ -21,8 +21,9 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20210503212227-fb464eba2686 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	github.com/smartystreets/goconvey v1.6.4 // indirect
+	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
 	moul.io/http2curl v1.0.0 // indirect
 )
